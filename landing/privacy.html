@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — 0xRadar</title>
+  <meta name="description" content="0xRadar Privacy Policy. Learn how we handle your data, what we collect, and how we protect your privacy." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%2300D1FF'/><path d='M16 8 L16 24 M8 16 L24 16' stroke='%230A0E27' stroke-width='3' stroke-linecap='round'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0A0E27; color: #E0E0E0; line-height: 1.7; }
+    a { color: #00D1FF; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    .navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 14px 0; background: rgba(10,14,39,0.95); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,209,255,0.1); }
+    .navbar .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 20px; color: #fff; text-decoration: none; }
+    .nav-logo:hover { text-decoration: none; }
+    .nav-logo-icon { width: 32px; height: 32px; border-radius: 8px; background: rgba(0,209,255,0.15); display: flex; align-items: center; justify-content: center; }
+    .nav-logo-icon svg { width: 20px; height: 20px; }
+    .nav-back { font-size: 14px; color: #8E8E93; display: flex; align-items: center; gap: 6px; transition: color 0.2s; }
+    .nav-back:hover { color: #00D1FF; text-decoration: none; }
+
+    .page-header { padding: 140px 0 60px; text-align: center; background: linear-gradient(180deg, #0D1135 0%, #0A0E27 100%); }
+    .page-header h1 { font-size: clamp(32px, 5vw, 48px); font-weight: 800; color: #fff; letter-spacing: -1px; margin-bottom: 12px; }
+    .page-header p { font-size: 15px; color: #8E8E93; }
+
+    .content { max-width: 760px; margin: 0 auto; padding: 60px 24px 100px; }
+    .content h2 { font-size: 22px; font-weight: 700; color: #FFFFFF; margin: 48px 0 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .content h2:first-child { margin-top: 0; border-top: none; padding-top: 0; }
+    .content h3 { font-size: 17px; font-weight: 600; color: #C0C0C0; margin: 24px 0 10px; }
+    .content p { margin-bottom: 16px; font-size: 15px; }
+    .content ul { margin: 12px 0 20px 20px; }
+    .content li { margin-bottom: 8px; font-size: 15px; }
+    .content strong { color: #FFFFFF; }
+    .content code { font-family: 'JetBrains Mono', monospace; background: rgba(0,209,255,0.08); color: #00D1FF; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+
+    .last-updated { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: rgba(0,209,255,0.08); border: 1px solid rgba(0,209,255,0.15); border-radius: 8px; font-size: 13px; color: #8E8E93; margin-top: 16px; }
+
+    .footer { background: #080B1E; border-top: 1px solid rgba(255,255,255,0.06); padding: 32px 0; text-align: center; }
+    .footer p { font-size: 13px; color: #8E8E93; }
+
+    @media (max-width: 768px) {
+      .page-header { padding: 120px 0 40px; }
+      .content { padding: 40px 20px 80px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-logo">
+        <div class="nav-logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="9" stroke="#00D1FF" stroke-width="1.5" stroke-dasharray="3 6" opacity="0.5"/>
+            <circle cx="12" cy="12" r="5" stroke="#00D1FF" stroke-width="1.5" opacity="0.8"/>
+            <circle cx="12" cy="12" r="1.5" fill="#00D1FF"/>
+            <line x1="12" y1="2" x2="12" y2="6" stroke="#00D1FF" stroke-width="1.5" opacity="0.4"/>
+            <line x1="12" y1="18" x2="12" y2="22" stroke="#00D1FF" stroke-width="1.5" opacity="0.4"/>
+            <line x1="2" y1="12" x2="6" y2="12" stroke="#00D1FF" stroke-width="1.5" opacity="0.4"/>
+            <line x1="18" y1="12" x2="22" y2="12" stroke="#00D1FF" stroke-width="1.5" opacity="0.4"/>
+          </svg>
+        </div>
+        <span><span class="mono" style="color:#00D1FF">0x</span>Radar</span>
+      </a>
+      <a href="index.html" class="nav-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to Home
+      </a>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1>Privacy Policy</h1>
+    <p>How 0xRadar handles your data and protects your privacy.</p>
+    <div class="last-updated">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Last updated: May 27, 2026
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <h2>1. Overview</h2>
+    <p>0xRadar ("we", "us", or "our") operates the website <strong>0xradar.app</strong>, the Chrome browser extension ("Extension"), and the API service available at <strong>api.0xradar.app</strong>. This Privacy Policy explains what data we collect, why we collect it, and how we handle it.</p>
+    <p>By using 0xRadar, you agree to the practices described in this policy. If you disagree with any part, please discontinue use of our services.</p>
+
+    <h2>2. What We Do NOT Collect</h2>
+    <p>We want to be explicit about what we never ask for and never have access to:</p>
+    <ul>
+      <li><strong>Seed phrases / mnemonic words</strong> &mdash; never requested, never stored, never transmitted.</li>
+      <li><strong>Private keys</strong> &mdash; the Extension reads only public wallet addresses.</li>
+      <li><strong>Keystore files</strong> &mdash; never imported or uploaded.</li>
+      <li><strong>Exchange account credentials</strong> &mdash; we do not connect to centralized exchanges.</li>
+      <li><strong>Government-issued IDs</strong> &mdash; we do not require KYC for using the product.</li>
+    </ul>
+
+    <h2>3. Data We Collect</h2>
+
+    <h3>3.1 Data You Provide</h3>
+    <ul>
+      <li><strong>Wallet addresses</strong> &mdash; public blockchain addresses you add to track. These are public information on their respective blockchains.</li>
+      <li><strong>Telegram chat ID</strong> &mdash; if you enable alert notifications via our Telegram bot, we store your Telegram chat ID to deliver messages.</li>
+      <li><strong>Email address</strong> &mdash; only if you provide it for account recovery or transactional notifications (optional).</li>
+      <li><strong>API key</strong> &mdash; a programmatically generated key (<code>ck_...</code> or <code>rk_...</code>) for authenticating API requests.</li>
+    </ul>
+
+    <h3>3.2 Data Collected Automatically</h3>
+    <ul>
+      <li><strong>Blockchain data</strong> &mdash; token balances, DeFi positions, health factors, and token metadata fetched from public RPC nodes (Alchemy, QuickNode, Helius, and public endpoints). This is public blockchain data.</li>
+      <li><strong>Usage analytics</strong> &mdash; anonymous, aggregated usage statistics via Plausible (self-hosted). We do not use Google Analytics or any third-party tracking cookies. No personally identifiable information is collected by our analytics.</li>
+      <li><strong>Error reports</strong> &mdash; automated error telemetry via Sentry, limited to technical stack traces and error context. No wallet addresses or personal data are included in error reports.</li>
+      <li><strong>Server logs</strong> &mdash; standard HTTP access logs (IP address, request path, response code, timestamp) retained for 30 days for security and debugging purposes.</li>
+    </ul>
+
+    <h3>3.3 Payment Data</h3>
+    <p>0xRadar accepts cryptocurrency payments exclusively (BTC, ETH, SOL, BNB, KAS). We process payments through <strong>NOWPayments</strong> as our payment processor.</p>
+    <ul>
+      <li><strong>On-chain transaction data</strong> &mdash; transaction hashes, sender addresses, and amounts are recorded to confirm payments and activate subscriptions. This data is already public on the respective blockchains.</li>
+      <li><strong>Payment quotes</strong> &mdash; exchange rate locks, deposit addresses, and payment status are stored temporarily (30 days) for reconciliation.</li>
+      <li>We <strong>do not</strong> collect credit card numbers, bank account details, or any traditional financial information.</li>
+    </ul>
+
+    <h2>4. How We Use Data</h2>
+    <p>We use collected data exclusively to:</p>
+    <ul>
+      <li>Provide and improve the 0xRadar service (portfolio tracking, alerts, risk scoring, sweep calculations).</li>
+      <li>Deliver Telegram notifications and transactional emails you have opted into.</li>
+      <li>Process and verify cryptocurrency payments.</li>
+      <li>Authenticate API requests and enforce rate limits.</li>
+      <li>Maintain service security, prevent abuse, and debug issues.</li>
+      <li>Comply with legal obligations.</li>
+    </ul>
+    <p>We <strong>never</strong> sell, rent, or share your personal data with third parties for marketing purposes.</p>
+
+    <h2>5. Data Storage &amp; Security</h2>
+    <ul>
+      <li><strong>Database</strong> &mdash; user data is stored in PostgreSQL hosted on Supabase (EU region), encrypted at rest and in transit.</li>
+      <li><strong>API keys</strong> &mdash; stored as SHA-256 hashes with per-user salts. The original key is shown only once at creation.</li>
+      <li><strong>Encryption</strong> &mdash; all communications use HTTPS (TLS 1.3) via Caddy reverse proxy with automatic Let's Encrypt certificates.</li>
+      <li><strong>Infrastructure</strong> &mdash; backend servers are hosted on Hetzner (Frankfurt, EU) with UFW firewall and fail2ban intrusion detection.</li>
+      <li><strong>Access control</strong> &mdash; production database access is restricted to the minimum necessary personnel via SSH key authentication.</li>
+    </ul>
+
+    <h2>6. Data Retention</h2>
+    <table style="width:100%; border-collapse:collapse; margin: 16px 0;">
+      <thead>
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+          <th style="text-align:left; padding:10px; color:#fff; font-size:14px;">Data Type</th>
+          <th style="text-align:left; padding:10px; color:#fff; font-size:14px;">Retention Period</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <td style="padding:10px; font-size:14px;">Account data (email, API key hash)</td>
+          <td style="padding:10px; font-size:14px;">Until account deletion</td>
+        </tr>
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <td style="padding:10px; font-size:14px;">Wallet addresses</td>
+          <td style="padding:10px; font-size:14px;">Until you remove them or delete account</td>
+        </tr>
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <td style="padding:10px; font-size:14px;">Cached blockchain data</td>
+          <td style="padding:10px; font-size:14px;">5 minutes to 6 hours (TTL-based)</td>
+        </tr>
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <td style="padding:10px; font-size:14px;">Payment records</td>
+          <td style="padding:10px; font-size:14px;">7 years (financial record-keeping)</td>
+        </tr>
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <td style="padding:10px; font-size:14px;">Server access logs</td>
+          <td style="padding:10px; font-size:14px;">30 days</td>
+        </tr>
+        <tr>
+          <td style="padding:10px; font-size:14px;">Sentry error events</td>
+          <td style="padding:10px; font-size:14px;">90 days</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>7. Third-Party Services</h2>
+    <p>0xRadar integrates with the following third-party services. Each has their own privacy policy:</p>
+    <ul>
+      <li><strong>Alchemy</strong> &mdash; blockchain RPC provider. <a href="https://www.alchemy.com/privacy" target="_blank" rel="noopener">Privacy Policy</a></li>
+      <li><strong>NOWPayments</strong> &mdash; cryptocurrency payment processing. <a href="https://nowpayments.io/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a></li>
+      <li><strong>RapidAPI</strong> &mdash; API distribution marketplace (B2B only). <a href="https://rapidapi.com/privacy" target="_blank" rel="noopener">Privacy Policy</a></li>
+      <li><strong>Telegram (Bot API)</strong> &mdash; alert delivery. <a href="https://telegram.org/privacy" target="_blank" rel="noopener">Privacy Policy</a></li>
+      <li><strong>Supabase</strong> &mdash; database hosting. <a href="https://supabase.com/privacy" target="_blank" rel="noopener">Privacy Policy</a></li>
+      <li><strong>Sentry</strong> &mdash; error tracking. <a href="https://sentry.io/privacy/" target="_blank" rel="noopener">Privacy Policy</a></li>
+      <li><strong>CoinGecko</strong> &mdash; cryptocurrency price data. <a href="https://www.coingecko.com/en/privacy" target="_blank" rel="noopener">Privacy Policy</a></li>
+      <li><strong>GoPlus Security</strong> &mdash; token risk data fallback. <a href="https://gopluslabs.io/privacy" target="_blank" rel="noopener">Privacy Policy</a></li>
+    </ul>
+
+    <h2>8. Your Rights</h2>
+    <p>You have the following rights regarding your data:</p>
+    <ul>
+      <li><strong>Access</strong> &mdash; request a copy of all data we hold about you.</li>
+      <li><strong>Correction</strong> &mdash; request correction of inaccurate data.</li>
+      <li><strong>Deletion</strong> &mdash; request deletion of your account and associated data. Wallet addresses, API keys, cached data, and alert history will be permanently removed within 30 days. Payment records are retained for 7 years per financial regulations.</li>
+      <li><strong>Data portability</strong> &mdash; export your data in a machine-readable format.</li>
+      <li><strong>Objection</strong> &mdash; opt out of non-essential data processing.</li>
+    </ul>
+    <p>To exercise any of these rights, contact us at <strong>privacy@0xradar.app</strong>. We will respond within 30 days.</p>
+
+    <h2>9. Cookies</h2>
+    <p>The 0xRadar website uses minimal cookies:</p>
+    <ul>
+      <li><strong>Essential cookies</strong> &mdash; session authentication (if applicable). No third-party tracking cookies.</li>
+      <li><strong>Plausible analytics</strong> &mdash; privacy-first, cookie-less analytics. Plausible does not use cookies and complies with GDPR without a consent banner. See <a href="https://plausible.io/privacy-focused-web-analytics" target="_blank" rel="noopener">Plausible's privacy approach</a>.</li>
+    </ul>
+    <p>The Chrome Extension uses <code>chrome.storage.sync</code> and <code>IndexedDB</code> for local settings and cache. This data never leaves your browser unless you explicitly sync it.</p>
+
+    <h2>10. International Data Transfers</h2>
+    <p>0xRadar's primary infrastructure is located in the European Union (Hetzner Frankfurt, Supabase EU region). Some third-party services (Alchemy, Sentry) may process data in the United States. We rely on Standard Contractual Clauses and the EU-U.S. Data Privacy Framework where applicable.</p>
+
+    <h2>11. Children's Privacy</h2>
+    <p>0xRadar is not intended for use by individuals under the age of 18. We do not knowingly collect data from minors. If we learn that a user under 18 has provided personal information, we will delete it promptly.</p>
+
+    <h2>12. Changes to This Policy</h2>
+    <p>We may update this Privacy Policy periodically. Significant changes will be communicated via:</p>
+    <ul>
+      <li>A notice on the 0xRadar website.</li>
+      <li>An email notification (if you have provided your email).</li>
+      <li>An updated "Last updated" date at the top of this page.</li>
+    </ul>
+    <p>Continued use of 0xRadar after changes constitutes acceptance of the updated policy.</p>
+
+    <h2>13. Contact</h2>
+    <p>For privacy-related questions, data requests, or concerns:</p>
+    <ul>
+      <li>Email: <strong>privacy@0xradar.app</strong></li>
+      <li>Twitter: <a href="https://twitter.com/0xradarapp" target="_blank" rel="noopener">@0xradarapp</a></li>
+      <li>GitHub: <a href="https://github.com/0xradarapp" target="_blank" rel="noopener">github.com/0xradarapp</a></li>
+    </ul>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2026 0xRadar &bull; <a href="index.html">Home</a> &bull; <a href="terms.html">Terms</a> &bull; <a href="refund.html">Refunds</a></p>
+  </footer>
+
+</body>
+</html>

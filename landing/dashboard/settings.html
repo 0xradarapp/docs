@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings — 0xRadar</title>
+  <link rel="stylesheet" href="assets/dashboard.css">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+</head>
+<body>
+  <div class="app-shell">
+
+    <!-- Sidebar backdrop (mobile) -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="dashboard.html" class="sidebar-logo">
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
+            <rect width="40" height="40" rx="8" fill="#0A0E27"/>
+            <circle cx="20" cy="20" r="4" fill="#00D1FF"/>
+            <circle cx="20" cy="20" r="9" stroke="#00D1FF" stroke-width="1.5" opacity="0.6"/>
+            <circle cx="20" cy="20" r="14" stroke="#00D1FF" stroke-width="1" opacity="0.3"/>
+          </svg>
+          <span class="sidebar-logo-text">0xRadar</span>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="nav-section-label">Main</span>
+        <a href="dashboard.html" class="nav-item" data-page="dashboard">
+          <svg viewBox="0 0 20 20" fill="none">
+            <rect x="2" y="2" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="11" y="2" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="2" y="11" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="11" y="11" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          Dashboard
+        </a>
+        <a href="dashboard.html#keys" class="nav-item" data-page="keys">
+          <svg viewBox="0 0 20 20" fill="none">
+            <path d="M15.5 7.5h-2a4 4 0 010 8h2m0-4v4m0-4v-1a3 3 0 016 0v1m-6-2h1.5a2.5 2.5 0 010 5H15m0-5H17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          API Keys
+        </a>
+        <a href="dashboard.html#subscription" class="nav-item" data-page="subscription">
+          <svg viewBox="0 0 20 20" fill="none">
+            <rect x="2" y="5" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M2 8l4 3 3-2 3 2 4-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Subscription
+        </a>
+        <a href="settings.html" class="nav-item active" data-page="settings">
+          <svg viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M10 2v2m0 12v2M2 10h2m12 0h2M4.22 4.22l1.42 1.42m8.72 8.72 1.42 1.42M4.22 15.78l1.42-1.42M13.36 13.36l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Settings
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="https://api.0xradar.app/docs" target="_blank" class="nav-item">
+          <svg viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M8 7.5a2 2 0 114 0 2 2 0 01-4 0z" fill="currentColor"/>
+            <path d="M10 13.5c0-1.5 2-2 2-3.5a2 2 0 00-4 0" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          API Docs
+        </a>
+        <button class="nav-item" id="btn-logout">
+          <svg viewBox="0 0 20 20" fill="none">
+            <path d="M13 3h3a2 2 0 012 2v9a2 2 0 01-2 2h-3M7 10l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M11 7H7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+      <!-- Top header -->
+      <header class="top-header">
+        <div class="header-left">
+          <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle menu">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <h1 class="page-title">Account Settings</h1>
+        </div>
+        <div class="header-right">
+          <button class="theme-toggle" id="btn-theme" title="Toggle theme">
+            <svg id="icon-sun" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M8 1.5v1m0 11v1M1.5 8h1m11 0h1M3.05 3.05l.7.7m8.5 8.5.7.7M3.05 12.95l.7-.7m8.5-8.5.7-.7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+          </button>
+
+          <div class="user-menu">
+            <button class="user-menu-btn" id="user-menu-btn">
+              <div class="user-avatar" id="user-avatar">U</div>
+              <span class="user-email" id="user-email">user@example.com</span>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <div class="user-dropdown" id="user-dropdown">
+              <a href="settings.html" class="dropdown-item">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1.3"/>
+                  <path d="M7 1.5v1.5m0 9v1.5M1.5 7h1.5m9 0h1.5M3 3l.7.7m6.6 6.6.7.7M3 11l.7-.7m6.6-6.6.7-.7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                </svg>
+                Settings
+              </a>
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-item danger" id="dropdown-logout">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M10 3.5h2.5a1 1 0 011 1v5a1 1 0 01-1 1H10M6 10l3-3-3-3M9 7H4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Page content -->
+      <div class="page-container">
+
+        <!-- Email Section -->
+        <div class="card" style="margin-bottom: 20px;">
+          <div class="card-header">
+            <h2 class="card-title">Email Address</h2>
+          </div>
+          <div id="email-section">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+              <div>
+                <p class="text-sm" style="margin-bottom: 4px; color: var(--text-secondary);">Your account email. Used for login and billing.</p>
+                <p class="font-mono" id="current-email" style="font-size: 1rem;">user@example.com</p>
+              </div>
+              <button class="btn btn-secondary" id="btn-change-email">Change Email</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notifications Section -->
+        <div class="card" style="margin-bottom: 20px;">
+          <div class="card-header">
+            <h2 class="card-title">Notification Preferences</h2>
+          </div>
+          <div id="notifications-section">
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label-text">Rate limit warning</div>
+                <div class="toggle-label-desc">Notify when you reach 80% of your daily limit</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="notif-rate-limit" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label-text">Subscription expiring</div>
+                <div class="toggle-label-desc">Reminder 7 days before your subscription renews</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="notif-expiry" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label-text">New features</div>
+                <div class="toggle-label-desc">Be the first to know about new API features and endpoints</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="notif-features">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Language Section -->
+        <div class="card" style="margin-bottom: 20px;">
+          <div class="card-header">
+            <h2 class="card-title">Language</h2>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-secondary lang-btn" id="btn-lang-en" data-lang="en">English</button>
+              <button class="btn btn-secondary lang-btn" id="btn-lang-tr" data-lang="tr">Türkçe</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="card" style="margin-bottom: 20px; border-color: rgba(255, 82, 82, 0.2);">
+          <div class="card-header">
+            <h2 class="card-title" style="color: var(--danger);">Danger Zone</h2>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <p style="font-size: 0.9375rem; color: var(--text-primary); margin-bottom: 4px;">Delete Account</p>
+              <p class="text-sm" style="color: var(--text-secondary);">Permanently delete your account, all API keys, and usage history. This cannot be undone.</p>
+            </div>
+            <button class="btn btn-danger" id="btn-delete-account">Delete Account</button>
+          </div>
+        </div>
+
+        <!-- Footer info -->
+        <div style="text-align: center; padding: 20px 0; border-top: 1px solid var(--border); margin-top: 12px;">
+          <p class="text-sm text-muted">
+            0xRadar Dashboard v1.0.0 —
+            <a href="https://0xradar.app/privacy" target="_blank" class="text-accent">Privacy Policy</a> —
+            <a href="https://0xradar.app/terms" target="_blank" class="text-accent">Terms of Service</a>
+          </p>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Delete account confirmation modal -->
+  <div class="modal-backdrop" id="modal-delete-account">
+    <div class="modal">
+      <h2 class="modal-title" style="color: var(--danger);">Delete Account?</h2>
+      <p class="modal-desc">This will permanently delete your account, all API keys, and usage history. This action cannot be undone.</p>
+      <div class="form-group">
+        <label for="input-delete-confirm" class="form-label">Type your email to confirm:</label>
+        <input type="text" id="input-delete-confirm" class="form-input" placeholder="user@example.com">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="btn-cancel-delete">Cancel</button>
+        <button class="btn btn-danger" id="btn-confirm-delete" disabled>Delete Forever</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change email modal -->
+  <div class="modal-backdrop" id="modal-change-email">
+    <div class="modal">
+      <h2 class="modal-title">Change Email</h2>
+      <p class="modal-desc">Enter your new email address. A verification link will be sent to confirm the change.</p>
+      <div class="form-group">
+        <label for="input-new-email" class="form-label">New Email</label>
+        <input type="email" id="input-new-email" class="form-input" placeholder="new@example.com">
+      </div>
+      <div class="form-hint error hidden" id="email-change-error" style="margin-top: 6px;"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="btn-cancel-email">Cancel</button>
+        <button class="btn btn-primary" id="btn-confirm-email">Send Verification</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/i18n.js"></script>
+  <script src="assets/auth.js"></script>
+  <script src="assets/api.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      initI18n();
+
+      // ─── Auth Guard ───────────────────────────────────────────────
+      if (!Auth.isSessionValid()) {
+        window.location.href = 'login.html?return=' + encodeURIComponent(window.location.href);
+        return;
+      }
+
+      const currentUser = Auth.getCurrentUser();
+
+      // ─── DOM refs ────────────────────────────────────────────────
+      const $sidebarBackdrop = document.getElementById('sidebar-backdrop');
+      const $sidebarToggle = document.getElementById('sidebar-toggle');
+
+      // ─── Theme ────────────────────────────────────────────────────
+      function applyTheme(isDark) {
+        if (isDark) {
+          document.body.classList.remove('light-mode');
+        } else {
+          document.body.classList.add('light-mode');
+        }
+        localStorage.setItem('0xr_theme', isDark ? 'dark' : 'light');
+      }
+
+      function initTheme() {
+        const stored = localStorage.getItem('0xr_theme');
+        if (stored === 'light') applyTheme(false);
+        else if (stored === 'dark') applyTheme(true);
+        else applyTheme(true);
+      }
+
+      document.getElementById('btn-theme').addEventListener('click', () => {
+        const isDark = !document.body.classList.contains('light-mode');
+        applyTheme(isDark);
+      });
+
+      // ─── Sidebar (mobile) ─────────────────────────────────────────
+      document.getElementById('sidebar-toggle').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('open');
+        $sidebarBackdrop.classList.toggle('open');
+      });
+
+      $sidebarBackdrop.addEventListener('click', () => {
+        document.getElementById('sidebar').classList.remove('open');
+        $sidebarBackdrop.classList.remove('open');
+      });
+
+      // ─── User display ─────────────────────────────────────────────
+      const email = currentUser?.email || 'user@example.com';
+      document.getElementById('user-email').textContent = email;
+      document.getElementById('user-avatar').textContent = email.charAt(0).toUpperCase();
+      document.getElementById('current-email').textContent = email;
+
+      // ─── User menu ────────────────────────────────────────────────
+      document.getElementById('user-menu-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.getElementById('user-dropdown').classList.toggle('open');
+      });
+      document.addEventListener('click', () => {
+        document.getElementById('user-dropdown').classList.remove('open');
+      });
+
+      // ─── Logout ───────────────────────────────────────────────────
+      function bindLogout(btn) {
+        btn.addEventListener('click', async () => {
+          await Auth.logout();
+        });
+      }
+      bindLogout(document.getElementById('btn-logout'));
+      bindLogout(document.getElementById('dropdown-logout'));
+
+      // ─── Toast ────────────────────────────────────────────────────
+      const $toastContainer = document.getElementById('toast-container');
+
+      function showToast(title, message, type = 'info') {
+        const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+          <span class="toast-icon">${icons[type] || icons.info}</span>
+          <div class="toast-content">
+            <div class="toast-title">${title}</div>
+            ${message ? `<div class="toast-message">${message}</div>` : ''}
+          </div>
+          <button class="toast-close">×</button>
+        `;
+        $toastContainer.appendChild(toast);
+        toast.querySelector('.toast-close').addEventListener('click', () => toast.remove());
+        setTimeout(() => toast.remove(), 4000);
+      }
+
+      // ─── Language ─────────────────────────────────────────────────
+      function updateLangButtons() {
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+          const isActive = btn.dataset.lang === I18n.getLocale();
+          btn.classList.toggle('btn-primary', isActive);
+          btn.classList.toggle('btn-secondary', !isActive);
+        });
+      }
+
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          I18n.setLocale(btn.dataset.lang);
+          updateLangButtons();
+          updatePageTexts();
+        });
+      });
+
+      function updatePageTexts() {
+        document.title = I18n.t('settings.title') + ' — 0xRadar';
+        document.querySelector('.page-title').textContent = I18n.t('settings.title');
+      }
+
+      // ─── Notifications ────────────────────────────────────────────
+      // Load from localStorage (MVP — no backend)
+      function loadNotificationPrefs() {
+        const prefs = JSON.parse(localStorage.getItem('0xr_notif_prefs') || '{}');
+        document.getElementById('notif-rate-limit').checked = prefs.rateLimit !== false;
+        document.getElementById('notif-expiry').checked = prefs.expiry !== false;
+        document.getElementById('notif-features').checked = prefs.features || false;
+      }
+
+      function saveNotificationPrefs() {
+        const prefs = {
+          rateLimit: document.getElementById('notif-rate-limit').checked,
+          expiry: document.getElementById('notif-expiry').checked,
+          features: document.getElementById('notif-features').checked
+        };
+        localStorage.setItem('0xr_notif_prefs', JSON.stringify(prefs));
+        showToast(I18n.t('toast.saved'), '', 'success');
+      }
+
+      document.getElementById('notif-rate-limit').addEventListener('change', saveNotificationPrefs);
+      document.getElementById('notif-expiry').addEventListener('change', saveNotificationPrefs);
+      document.getElementById('notif-features').addEventListener('change', saveNotificationPrefs);
+
+      // ─── Change email modal ─────────────────────────────────────────
+      document.getElementById('btn-change-email').addEventListener('click', () => {
+        document.getElementById('input-new-email').value = '';
+        document.getElementById('email-change-error').classList.add('hidden');
+        document.getElementById('modal-change-email').classList.add('open');
+      });
+
+      document.getElementById('btn-cancel-email').addEventListener('click', () => {
+        document.getElementById('modal-change-email').classList.remove('open');
+      });
+
+      document.getElementById('btn-confirm-email').addEventListener('click', async () => {
+        const newEmail = document.getElementById('input-new-email').value.trim();
+        const errorEl = document.getElementById('email-change-error');
+
+        if (!newEmail || !newEmail.includes('@')) {
+          errorEl.textContent = 'Invalid email address';
+          errorEl.classList.remove('hidden');
+          return;
+        }
+
+        if (newEmail === currentUser.email) {
+          errorEl.textContent = 'This is already your current email';
+          errorEl.classList.remove('hidden');
+          return;
+        }
+
+        document.getElementById('btn-confirm-email').disabled = true;
+        errorEl.classList.add('hidden');
+
+        // TODO: Call API to send verification email
+        // For now, simulate success
+        setTimeout(() => {
+          document.getElementById('modal-change-email').classList.remove('open');
+          showToast('Verification email sent', `Check ${newEmail} for a confirmation link`, 'success');
+          document.getElementById('btn-confirm-email').disabled = false;
+        }, 1000);
+      });
+
+      // ─── Delete account modal ──────────────────────────────────────
+      const deleteModal = document.getElementById('modal-delete-account');
+      const deleteInput = document.getElementById('input-delete-confirm');
+      const confirmBtn = document.getElementById('btn-confirm-delete');
+
+      document.getElementById('btn-delete-account').addEventListener('click', () => {
+        deleteInput.value = '';
+        confirmBtn.disabled = true;
+        deleteModal.classList.add('open');
+      });
+
+      document.getElementById('btn-cancel-delete').addEventListener('click', () => {
+        deleteModal.classList.remove('open');
+      });
+
+      deleteInput.addEventListener('input', () => {
+        confirmBtn.disabled = deleteInput.value.trim() !== email;
+      });
+
+      confirmBtn.addEventListener('click', async () => {
+        confirmBtn.disabled = true;
+        const token = Auth.getAuthToken();
+
+        try {
+          await Api.deleteAccount(token);
+          deleteModal.classList.remove('open');
+          showToast(I18n.t('settings.deleted'), '', 'success');
+          setTimeout(() => Auth.logout(), 2000);
+        } catch (err) {
+          showToast(I18n.t('toast.error'), err.message, 'error');
+          confirmBtn.disabled = false;
+        }
+      });
+
+      // ─── Init ─────────────────────────────────────────────────────
+      initTheme();
+      loadNotificationPrefs();
+      updateLangButtons();
+      updatePageTexts();
+    })();
+  </script>
+</body>
+</html>

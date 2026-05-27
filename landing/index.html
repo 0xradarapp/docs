@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>0xRadar — Multi-chain Wallet Intelligence | Portfolio, Alerts, Risk</title>
+  <meta name="description" content="Track all your crypto wallets across 7 chains. Get DeFi liquidation alerts, token risk scores, and sweep cost calculations. Chrome extension + API. Pay with crypto." />
+  <meta name="keywords" content="multi-chain wallet tracker, defi liquidation alert, wallet sweeper tool, crypto wallet security extension, token risk scanner chrome" />
+  <meta property="og:title" content="0xRadar — Multi-chain Wallet Intelligence" />
+  <meta property="og:description" content="See every wallet. Catch every risk. Portfolio, DeFi alerts, token risk scoring, and sweep cost calculator in one extension." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://0xradar.app" />
+  <meta property="og:image" content="https://0xradar.app/og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@0xradarapp" />
+  <meta name="twitter:title" content="0xRadar — Multi-chain Wallet Intelligence" />
+  <meta name="twitter:description" content="See every wallet. Catch every risk. Portfolio + DeFi alerts + token risk + sweep calculator." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%2300D1FF'/><path d='M16 8 L16 24 M8 16 L24 16' stroke='%230A0E27' stroke-width='3' stroke-linecap='round'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "0xRadar",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web, Chrome Extension",
+    "description": "Multi-chain wallet intelligence — portfolio, DeFi alerts, token risk, sweep calculator across 7 EVM chains.",
+    "offers": [
+      {"@type": "Offer", "price": "0", "priceCurrency": "USD", "name": "Free tier"},
+      {"@type": "Offer", "price": "9.99", "priceCurrency": "USD", "name": "Pro Monthly"},
+      {"@type": "Offer", "price": "99", "priceCurrency": "USD", "name": "Pro Yearly"},
+      {"@type": "Offer", "price": "199", "priceCurrency": "USD", "name": "Lifetime"}
+    ],
+    "author": {"@type": "Organization", "name": "0xRadar", "url": "https://0xradar.app"},
+    "url": "https://0xradar.app",
+    "sameAs": ["https://github.com/0xradarapp", "https://x.com/0xradarapp"]
+  }
+  </script>
+  <style>
+    /* ===== CSS Reset & Base ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0A0E27; color: #FFFFFF; line-height: 1.6; overflow-x: hidden; }
+    ::selection { background: rgba(0,209,255,0.3); color: #fff; }
+    a { color: inherit; text-decoration: none; }
+    img, svg { display: block; max-width: 100%; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Utility ===== */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    .cyan { color: #00D1FF; }
+    .slate { color: #8E8E93; }
+    .green { color: #00C851; }
+    .amber { color: #FFB800; }
+    .red { color: #FF3B30; }
+    .glow { text-shadow: 0 0 30px rgba(0,209,255,0.3); }
+    .gradient-text { background: linear-gradient(135deg, #00D1FF 0%, #00FFD1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .btn-primary { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; background: #00D1FF; color: #0A0E27; font-weight: 700; font-size: 15px; border-radius: 12px; border: none; cursor: pointer; transition: all 0.25s ease; text-decoration: none; }
+    .btn-primary:hover { background: #33DAFF; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,209,255,0.3); }
+    .btn-secondary { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; background: transparent; color: #00D1FF; font-weight: 600; font-size: 15px; border-radius: 12px; border: 1.5px solid rgba(0,209,255,0.3); cursor: pointer; transition: all 0.25s ease; text-decoration: none; }
+    .btn-secondary:hover { border-color: #00D1FF; background: rgba(0,209,255,0.08); transform: translateY(-2px); }
+
+    /* ===== Animations ===== */
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.7; } }
+    @keyframes sweep { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    .animate-in { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .animate-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* ===== Navbar ===== */
+    .navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 16px 0; transition: all 0.3s ease; background: transparent; }
+    .navbar.scrolled { background: rgba(10,14,39,0.9); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,209,255,0.1); padding: 12px 0; }
+    .navbar .container { display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 20px; }
+    .nav-logo-icon { width: 32px; height: 32px; border-radius: 8px; background: rgba(0,209,255,0.15); display: flex; align-items: center; justify-content: center; }
+    .nav-logo-icon svg { width: 20px; height: 20px; }
+    .nav-links { display: flex; align-items: center; gap: 32px; }
+    .nav-links a { font-size: 14px; font-weight: 500; color: #8E8E93; transition: color 0.2s; }
+    .nav-links a:hover { color: #FFFFFF; }
+    .nav-cta { padding: 8px 20px; font-size: 13px; }
+    .mobile-menu-btn { display: none; background: none; border: none; color: #fff; cursor: pointer; padding: 8px; }
+
+    /* ===== Hero ===== */
+    .hero { padding: 160px 0 100px; position: relative; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at 50% 30%, rgba(0,209,255,0.08) 0%, transparent 60%); pointer-events: none; }
+    .hero::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2300D1FF' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); pointer-events: none; }
+    .hero-inner { position: relative; z-index: 2; text-align: center; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; background: rgba(0,209,255,0.1); border: 1px solid rgba(0,209,255,0.2); border-radius: 100px; font-size: 13px; font-weight: 600; color: #00D1FF; margin-bottom: 32px; animation: fadeIn 0.8s ease; }
+    .hero-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: #00C851; animation: pulse 2s infinite; }
+    .hero-title { font-size: clamp(40px, 6vw, 72px); font-weight: 900; line-height: 1.05; letter-spacing: -2px; margin-bottom: 24px; animation: fadeInUp 0.8s ease 0.1s both; }
+    .hero-subtitle { font-size: clamp(16px, 2vw, 20px); color: #8E8E93; max-width: 640px; margin: 0 auto 40px; line-height: 1.7; animation: fadeInUp 0.8s ease 0.2s both; }
+    .hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; animation: fadeInUp 0.8s ease 0.3s both; }
+    .hero-checks { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin-top: 40px; animation: fadeInUp 0.8s ease 0.4s both; }
+    .hero-check { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #8E8E93; }
+    .hero-check svg { width: 16px; height: 16px; color: #00C851; flex-shrink: 0; }
+    .hero-visual { margin-top: 80px; position: relative; animation: fadeInUp 1s ease 0.5s both; }
+    .hero-logo-svg { max-width: 500px; margin: 0 auto; filter: drop-shadow(0 0 60px rgba(0,209,255,0.15)); animation: float 6s ease-in-out infinite; }
+
+    /* ===== Section base ===== */
+    section { padding: 100px 0; position: relative; }
+    .section-label { font-size: 13px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: #00D1FF; margin-bottom: 16px; }
+    .section-title { font-size: clamp(28px, 4vw, 48px); font-weight: 800; letter-spacing: -1px; margin-bottom: 20px; line-height: 1.15; }
+    .section-desc { font-size: 17px; color: #8E8E93; max-width: 600px; line-height: 1.7; }
+
+    /* ===== Problem ===== */
+    .problem { background: linear-gradient(180deg, #0A0E27 0%, #0D1135 100%); }
+    .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; margin-top: 60px; }
+    .problem-left .section-desc { margin-bottom: 32px; }
+    .pain-list { list-style: none; display: flex; flex-direction: column; gap: 20px; }
+    .pain-item { display: flex; gap: 16px; align-items: flex-start; padding: 20px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; transition: all 0.3s; }
+    .pain-item:hover { border-color: rgba(0,209,255,0.2); background: rgba(0,209,255,0.04); }
+    .pain-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; }
+    .pain-icon.red { background: rgba(255,59,48,0.1); }
+    .pain-icon.amber { background: rgba(255,184,0,0.1); }
+    .pain-icon.slate { background: rgba(142,142,147,0.1); }
+    .pain-text h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .pain-text p { font-size: 13px; color: #8E8E93; line-height: 1.5; }
+    .problem-right { position: relative; }
+    .problem-card { background: rgba(0,209,255,0.05); border: 1px solid rgba(0,209,255,0.15); border-radius: 16px; padding: 40px; text-align: center; }
+    .problem-card p { font-size: 22px; font-weight: 700; line-height: 1.4; }
+    .problem-card .arrow-down { margin-top: 20px; }
+    .problem-solution { margin-top: 20px; background: rgba(0,200,81,0.08); border: 1px solid rgba(0,200,81,0.2); border-radius: 16px; padding: 40px; text-align: center; }
+    .problem-solution p { font-size: 22px; font-weight: 700; }
+
+    /* ===== How It Works ===== */
+    .how-it-works { background: #0D1135; }
+    .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 60px; }
+    .step-card { padding: 36px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; position: relative; transition: all 0.3s; }
+    .step-card:hover { border-color: rgba(0,209,255,0.2); transform: translateY(-4px); }
+    .step-number { font-family: 'JetBrains Mono', monospace; font-size: 48px; font-weight: 700; color: rgba(0,209,255,0.15); margin-bottom: 20px; line-height: 1; }
+    .step-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(0,209,255,0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; font-size: 22px; }
+    .step-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+    .step-card p { font-size: 14px; color: #8E8E93; line-height: 1.6; }
+    .step-connector { display: none; }
+
+    /* ===== Features ===== */
+    .features { background: linear-gradient(180deg, #0D1135 0%, #0A0E27 100%); }
+    .features-header { text-align: center; margin-bottom: 60px; }
+    .features-header .section-desc { margin: 0 auto; }
+    .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+    .feature-card { padding: 36px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; transition: all 0.3s; position: relative; overflow: hidden; }
+    .feature-card:hover { border-color: rgba(0,209,255,0.2); transform: translateY(-4px); }
+    .feature-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--accent, #00D1FF), transparent); opacity: 0; transition: opacity 0.3s; }
+    .feature-card:hover::after { opacity: 1; }
+    .feature-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; font-size: 22px; }
+    .feature-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .feature-card .feature-subtitle { font-size: 13px; color: #00D1FF; font-weight: 600; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+    .feature-card p { font-size: 14px; color: #8E8E93; line-height: 1.7; }
+    .feature-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+    .feature-tag { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 6px; background: rgba(0,209,255,0.08); color: #00D1FF; border: 1px solid rgba(0,209,255,0.15); }
+
+    /* ===== Chains ===== */
+    .chains { background: #0A0E27; padding: 80px 0; }
+    .chains-header { text-align: center; margin-bottom: 48px; }
+    .chains-grid { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .chain-pill { display: flex; align-items: center; gap: 8px; padding: 10px 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 100px; font-size: 14px; font-weight: 600; transition: all 0.3s; }
+    .chain-pill:hover { border-color: rgba(0,209,255,0.3); background: rgba(0,209,255,0.06); }
+    .chain-pill .chain-icon { width: 20px; height: 20px; border-radius: 50%; }
+
+    /* ===== Pricing ===== */
+    .pricing { background: linear-gradient(180deg, #0A0E27 0%, #0D1135 100%); }
+    .pricing-header { text-align: center; margin-bottom: 60px; }
+    .pricing-header .section-desc { margin: 0 auto; }
+    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1000px; margin: 0 auto; }
+    .pricing-card { padding: 36px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; transition: all 0.3s; position: relative; display: flex; flex-direction: column; }
+    .pricing-card:hover { transform: translateY(-4px); }
+    .pricing-card.popular { border-color: rgba(0,209,255,0.4); background: rgba(0,209,255,0.06); }
+    .pricing-card.popular::before { content: 'Most Popular'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #00D1FF; color: #0A0E27; font-size: 11px; font-weight: 700; padding: 4px 16px; border-radius: 100px; text-transform: uppercase; letter-spacing: 1px; }
+    .pricing-card.crypto-only { border-color: rgba(255,184,0,0.3); background: rgba(255,184,0,0.04); }
+    .pricing-card.crypto-only::before { content: 'Crypto Only'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #FFB800, #FF8C00); color: #0A0E27; font-size: 11px; font-weight: 700; padding: 4px 16px; border-radius: 100px; text-transform: uppercase; letter-spacing: 1px; }
+    .pricing-tier { font-size: 13px; font-weight: 600; color: #8E8E93; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
+    .pricing-price { font-size: 44px; font-weight: 900; letter-spacing: -2px; margin-bottom: 4px; }
+    .pricing-price span { font-size: 16px; font-weight: 500; color: #8E8E93; }
+    .pricing-desc { font-size: 13px; color: #8E8E93; margin-bottom: 24px; }
+    .pricing-features { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; flex: 1; }
+    .pricing-features li { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #C0C0C0; }
+    .pricing-features li svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .pricing-card .btn-primary, .pricing-card .btn-secondary { width: 100%; justify-content: center; }
+
+    /* ===== Crypto Payment ===== */
+    .crypto-payment { background: #0D1135; }
+    .crypto-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+    .crypto-left .section-desc { margin-bottom: 32px; }
+    .crypto-coins { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 32px; }
+    .crypto-coin { display: flex; align-items: center; gap: 8px; padding: 10px 18px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; font-size: 14px; font-weight: 600; transition: all 0.3s; }
+    .crypto-coin:hover { border-color: rgba(0,209,255,0.3); background: rgba(0,209,255,0.06); }
+    .crypto-coin .coin-circle { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+    .crypto-benefits { list-style: none; display: flex; flex-direction: column; gap: 16px; }
+    .crypto-benefits li { display: flex; gap: 12px; align-items: center; font-size: 15px; }
+    .crypto-benefits li svg { width: 20px; height: 20px; color: #00C851; flex-shrink: 0; }
+    .crypto-right { display: flex; justify-content: center; }
+    .checkout-mockup { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 32px; max-width: 400px; width: 100%; }
+    .checkout-mockup h4 { font-size: 16px; font-weight: 700; margin-bottom: 24px; text-align: center; }
+    .checkout-plan { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .checkout-plan-label { font-size: 13px; color: #8E8E93; }
+    .checkout-plan-value { font-size: 14px; font-weight: 600; }
+    .checkout-coins-row { display: flex; gap: 8px; margin: 20px 0; justify-content: center; }
+    .checkout-coin-btn { width: 44px; height: 44px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+    .checkout-coin-btn.active, .checkout-coin-btn:hover { border-color: #00D1FF; background: rgba(0,209,255,0.1); color: #00D1FF; }
+    .checkout-amount { text-align: center; margin: 20px 0; padding: 20px; background: rgba(0,209,255,0.05); border-radius: 12px; border: 1px dashed rgba(0,209,255,0.2); }
+    .checkout-amount .label { font-size: 12px; color: #8E8E93; margin-bottom: 8px; }
+    .checkout-amount .value { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; color: #00D1FF; }
+    .checkout-amount .fiat { font-size: 13px; color: #8E8E93; margin-top: 4px; }
+    .checkout-timer { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; color: #FFB800; margin-top: 12px; }
+
+    /* ===== API / B2B ===== */
+    .api-section { background: linear-gradient(180deg, #0D1135 0%, #0A0E27 100%); }
+    .api-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+    .api-left .section-desc { margin-bottom: 24px; }
+    .code-block { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 28px; overflow-x: auto; }
+    .code-block-header { display: flex; gap: 6px; margin-bottom: 20px; }
+    .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .code-block pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.8; color: #C0C0C0; }
+    .code-keyword { color: #FF79C6; }
+    .code-string { color: #50FA7B; }
+    .code-func { color: #00D1FF; }
+    .code-comment { color: #6272A4; }
+    .code-var { color: #FFB800; }
+    .api-tiers { display: flex; gap: 16px; margin-top: 32px; flex-wrap: wrap; }
+    .api-tier-badge { padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+    .api-tier-badge strong { color: #00D1FF; }
+
+    /* ===== FAQ ===== */
+    .faq { background: #0A0E27; }
+    .faq-header { text-align: center; margin-bottom: 60px; }
+    .faq-header .section-desc { margin: 0 auto; }
+    .faq-list { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+    .faq-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; overflow: hidden; transition: all 0.3s; }
+    .faq-item:hover { border-color: rgba(0,209,255,0.15); }
+    .faq-question { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; cursor: pointer; font-size: 15px; font-weight: 600; width: 100%; background: none; border: none; color: #FFFFFF; text-align: left; }
+    .faq-question svg { width: 18px; height: 18px; color: #8E8E93; transition: transform 0.3s; flex-shrink: 0; margin-left: 16px; }
+    .faq-item.open .faq-question svg { transform: rotate(180deg); }
+    .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.4s ease; }
+    .faq-item.open .faq-answer { max-height: 300px; }
+    .faq-answer-inner { padding: 0 24px 20px; font-size: 14px; color: #8E8E93; line-height: 1.7; }
+
+    /* ===== CTA ===== */
+    .cta { background: linear-gradient(180deg, #0A0E27 0%, #0D1135 100%); text-align: center; padding: 120px 0; position: relative; overflow: hidden; }
+    .cta::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 600px; height: 600px; background: radial-gradient(circle, rgba(0,209,255,0.06) 0%, transparent 70%); pointer-events: none; }
+    .cta-inner { position: relative; z-index: 2; }
+    .cta .section-title { margin-bottom: 20px; }
+    .cta .section-desc { margin: 0 auto 40px; text-align: center; }
+    .cta-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+    /* ===== Footer ===== */
+    .footer { background: #080B1E; border-top: 1px solid rgba(255,255,255,0.06); padding: 60px 0 40px; }
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+    .footer-brand p { font-size: 13px; color: #8E8E93; margin-top: 12px; line-height: 1.6; max-width: 280px; }
+    .footer-col h4 { font-size: 13px; font-weight: 600; color: #8E8E93; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 16px; }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-col a { font-size: 14px; color: #8E8E93; transition: color 0.2s; }
+    .footer-col a:hover { color: #00D1FF; }
+    .footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .footer-copy { font-size: 13px; color: #8E8E93; }
+    .footer-socials { display: flex; gap: 16px; }
+    .footer-social { width: 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .footer-social:hover { border-color: rgba(0,209,255,0.3); background: rgba(0,209,255,0.08); }
+    .footer-social svg { width: 16px; height: 16px; color: #8E8E93; }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 1024px) {
+      .problem-grid, .crypto-inner, .api-inner { grid-template-columns: 1fr; gap: 40px; }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 420px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+    }
+    @media (max-width: 768px) {
+      section { padding: 70px 0; }
+      .hero { padding: 130px 0 70px; }
+      .nav-links { display: none; }
+      .nav-links.open { display: flex; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: rgba(10,14,39,0.98); backdrop-filter: blur(20px); padding: 24px; gap: 16px; border-bottom: 1px solid rgba(0,209,255,0.1); }
+      .mobile-menu-btn { display: block; }
+      .steps-grid { grid-template-columns: 1fr; }
+      .hero-checks { gap: 16px; }
+      .footer-grid { grid-template-columns: 1fr; gap: 24px; }
+      .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
+      .crypto-right { order: -1; }
+      .checkout-mockup { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========== NAVBAR ========== -->
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <a href="#" class="nav-logo">
+        <div class="nav-logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="9" stroke="#00D1FF" stroke-width="1.5" stroke-dasharray="3 6" opacity="0.5"/>
+            <circle cx="12" cy="12" r="5" stroke="#00D1FF" stroke-width="1.5" opacity="0.8"/>
+            <circle cx="12" cy="12" r="1.5" fill="#00D1FF"/>
+            <line x1="12" y1="2" x2="12" y2="6" stroke="#00D1FF" stroke-width="1.5" opacity="0.4"/>
+            <line x1="12" y1="18" x2="12" y2="22" stroke="#00D1FF" stroke-width="1.5" opacity="0.4"/>
+            <line x1="2" y1="12" x2="6" y2="12" stroke="#00D1FF" stroke-width="1.5" opacity="0.4"/>
+            <line x1="18" y1="12" x2="22" y2="12" stroke="#00D1FF" stroke-width="1.5" opacity="0.4"/>
+          </svg>
+        </div>
+        <span><span class="mono cyan">0x</span>Radar</span>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#api">API</a>
+        <a href="#faq">FAQ</a>
+        <a href="https://docs.0xradar.app" target="_blank" rel="noopener">Docs</a>
+        <a href="#cta" class="btn-primary nav-cta">Get Started</a>
+      </div>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ========== HERO ========== -->
+  <section class="hero" id="hero">
+    <div class="container">
+      <div class="hero-inner">
+        <div class="hero-badge">
+          <span class="dot"></span>
+          Coming Soon &mdash; Chrome Extension + API
+        </div>
+        <h1 class="hero-title">
+          See every wallet.<br />
+          <span class="gradient-text">Catch every risk.</span>
+        </h1>
+        <p class="hero-subtitle">
+          Multi-chain portfolio, DeFi position alerts, token risk scoring, and sweep cost calculator &mdash; in one Chrome extension and one API.
+        </p>
+        <div class="hero-buttons">
+          <a href="#cta" class="btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+            Install Free Extension
+          </a>
+          <a href="#api" class="btn-secondary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            Try the API
+          </a>
+        </div>
+        <div class="hero-checks">
+          <div class="hero-check">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            7 chains &bull; 5 lending protocols
+          </div>
+          <div class="hero-check">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            Real-time Telegram alerts
+          </div>
+          <div class="hero-check">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            Pay with BTC, ETH, SOL, BNB, KAS
+          </div>
+          <div class="hero-check">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            Open source extension
+          </div>
+        </div>
+
+        <!-- Logo Visual -->
+        <div class="hero-visual">
+          <div class="hero-logo-svg">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+              <defs>
+                <filter id="heroGlow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="4" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+              <g transform="translate(400, 200)">
+                <circle cx="0" cy="0" r="110" stroke="#00D1FF" fill="none" stroke-width="2" stroke-dasharray="6 12" opacity="0.3"/>
+                <circle cx="0" cy="0" r="70" stroke="#00D1FF" fill="none" stroke-width="1.5" opacity="0.5"/>
+                <circle cx="0" cy="0" r="30" stroke="#00D1FF" fill="none" stroke-width="1.5" opacity="0.8"/>
+                <circle cx="0" cy="0" r="6" fill="#00D1FF" filter="url(#heroGlow)"/>
+                <path d="M 0 0 L 0 -110 A 110 110 0 0 1 77.7 -77.7 Z" fill="#00D1FF" opacity="0.1"/>
+                <line x1="0" y1="0" x2="77.7" y2="-77.7" stroke="#00D1FF" stroke-width="3" stroke-linecap="round" filter="url(#heroGlow)"/>
+                <line x1="-140" y1="0" x2="-50" y2="0" stroke="#00D1FF" stroke-width="2" opacity="0.4"/>
+                <line x1="50" y1="0" x2="140" y2="0" stroke="#00D1FF" stroke-width="2" opacity="0.4"/>
+                <line x1="0" y1="-140" x2="0" y2="-50" stroke="#00D1FF" stroke-width="2" opacity="0.4"/>
+                <line x1="0" y1="50" x2="0" y2="140" stroke="#00D1FF" stroke-width="2" opacity="0.4"/>
+                <path d="M -12 -12 L 12 12 M 12 -12 L -12 12" stroke="#0A0E27" stroke-width="4" stroke-linecap="round" />
+                <path d="M -12 -12 L 12 12 M 12 -12 L -12 12" stroke="#00D1FF" stroke-width="2" stroke-linecap="round" />
+              </g>
+              <text x="400" y="410" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="68" fill="#00D1FF" font-weight="700">0x<tspan fill="#FFFFFF" font-family="Inter, sans-serif" font-weight="800" letter-spacing="-1px">Radar</tspan><tspan fill="#8E8E93" font-family="Inter, sans-serif" font-size="36" font-weight="600">.app</tspan></text>
+              <text x="400" y="460" text-anchor="middle" font-family="Inter, sans-serif" font-size="16" fill="#8E8E93" letter-spacing="2" font-weight="600">SEE EVERY WALLET &bull; CATCH EVERY RISK</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PROBLEM ========== -->
+  <section class="problem" id="problem">
+    <div class="container">
+      <div class="problem-grid">
+        <div class="problem-left animate-in">
+          <p class="section-label">The Problem</p>
+          <h2 class="section-title">Crypto wallet pain points nobody solves</h2>
+          <p class="section-desc">You have 8 wallets across 7 chains. You don't know which has value, which is at risk, and which you've forgotten about.</p>
+          <ul class="pain-list">
+            <li class="pain-item">
+              <div class="pain-icon red">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+              <div class="pain-text">
+                <h4>DeBank shows balances, but no alerts</h4>
+                <p>You see your portfolio, but miss liquidation events. No sweep helper, no real-time notifications.</p>
+              </div>
+            </li>
+            <li class="pain-item">
+              <div class="pain-icon amber">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFB800" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+              <div class="pain-text">
+                <h4>Hal.xyz alerts on Aave, but only Aave</h4>
+                <p>Multi-protocol borrowers need unified monitoring across Aave, Compound, Morpho, HyperLend, and Kamino.</p>
+              </div>
+            </li>
+            <li class="pain-item">
+              <div class="pain-icon slate">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8E8E93" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </div>
+              <div class="pain-text">
+                <h4>Etherscan is single-chain only</h4>
+                <p>Checking 7 chains one by one takes 3+ hours per week. No cross-chain aggregation exists.</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="problem-right animate-in">
+          <div class="problem-card">
+            <p>No single tool gives you <span class="cyan">complete wallet intelligence</span> across chains, protocols, and risk dimensions.</p>
+            <div class="arrow-down">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00D1FF" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+            </div>
+          </div>
+          <div class="problem-solution">
+            <p><span class="green">0xRadar is the missing layer.</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== HOW IT WORKS ========== -->
+  <section class="how-it-works" id="how-it-works">
+    <div class="container">
+      <div class="features-header animate-in">
+        <p class="section-label">How It Works</p>
+        <h2 class="section-title">Three steps to full visibility</h2>
+        <p class="section-desc">From installing the extension to catching risks in real-time, everything happens in under a minute.</p>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card animate-in">
+          <div class="step-number">01</div>
+          <div class="step-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00D1FF" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          </div>
+          <h3>Connect your wallets</h3>
+          <p>Install the Chrome extension, add your wallet addresses (read-only, no seed phrase ever requested). Supports 7 chains out of the box.</p>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-number">02</div>
+          <div class="step-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00D1FF" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <h3>See everything at a glance</h3>
+          <p>Portfolio across all chains, DeFi positions with health factors, token risk scores, and sweep cost estimates &mdash; all in one dashboard.</p>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-number">03</div>
+          <div class="step-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00D1FF" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          </div>
+          <h3>Get alerted before it's too late</h3>
+          <p>Real-time Telegram notifications when your health factor drops. Token risk warnings when you receive suspicious assets. Never miss a threat.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== FEATURES ========== -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="features-header animate-in">
+        <p class="section-label">Features</p>
+        <h2 class="section-title">Built for multi-chain power users</h2>
+        <p class="section-desc">Four pillars of wallet intelligence, tightly integrated in one platform.</p>
+      </div>
+      <div class="features-grid">
+        <!-- Feature 1: Multi-chain Portfolio -->
+        <div class="feature-card animate-in" style="--accent: #00D1FF">
+          <div class="feature-icon" style="background: rgba(0,209,255,0.1)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00D1FF" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+          </div>
+          <p class="feature-subtitle">Portfolio</p>
+          <h3>Multi-chain portfolio at a glance</h3>
+          <p>Track token balances, NFT counts, and native gas across Ethereum, Arbitrum, Base, Optimism, Polygon, BSC, and HyperEVM &mdash; all in one unified view.</p>
+          <div class="feature-tags">
+            <span class="feature-tag">7 Chains</span>
+            <span class="feature-tag">Token Balances</span>
+            <span class="feature-tag">NFT Count</span>
+            <span class="feature-tag">USD Values</span>
+          </div>
+        </div>
+        <!-- Feature 2: Liquidation Alerts -->
+        <div class="feature-card animate-in" style="--accent: #FF3B30">
+          <div class="feature-icon" style="background: rgba(255,59,48,0.1)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <p class="feature-subtitle">Alerts</p>
+          <h3>Multi-protocol liquidation alerts</h3>
+          <p>Monitor health factors across Aave V3, Compound V3, Morpho Blue, HyperLend, and Kamino. Get Telegram notifications in under 60 seconds when risk rises.</p>
+          <div class="feature-tags">
+            <span class="feature-tag">5 Protocols</span>
+            <span class="feature-tag">Telegram Bot</span>
+            <span class="feature-tag">&lt;60s Alerts</span>
+            <span class="feature-tag">Health Factor</span>
+          </div>
+        </div>
+        <!-- Feature 3: Token Risk -->
+        <div class="feature-card animate-in" style="--accent: #FFB800">
+          <div class="feature-icon" style="background: rgba(255,184,0,0.1)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFB800" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <p class="feature-subtitle">Risk Engine</p>
+          <h3>Token risk scoring</h3>
+          <p>Every token in your wallet scored from 0&ndash;100: honeypot detection, holder concentration, contract age, LP lock status, source verification, and trade pattern analysis.</p>
+          <div class="feature-tags">
+            <span class="feature-tag">Honeypot Check</span>
+            <span class="feature-tag">Holder Analysis</span>
+            <span class="feature-tag">LP Lock</span>
+            <span class="feature-tag">GoPlus Fallback</span>
+          </div>
+        </div>
+        <!-- Feature 4: Sweep Cost Calculator -->
+        <div class="feature-card animate-in" style="--accent: #00C851">
+          <div class="feature-icon" style="background: rgba(0,200,81,0.1)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00C851" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+          </div>
+          <p class="feature-subtitle">Sweep Calculator</p>
+          <h3>Sweep cost calculator</h3>
+          <p>Consolidate forgotten wallets. Know the exact gas cost and optimal route to sweep tokens from multiple chains into a single destination wallet before you act.</p>
+          <div class="feature-tags">
+            <span class="feature-tag">Gas Estimation</span>
+            <span class="feature-tag">Bridge Cost</span>
+            <span class="feature-tag">Optimal Route</span>
+            <span class="feature-tag">Multi-chain</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== SUPPORTED CHAINS ========== -->
+  <section class="chains" id="chains">
+    <div class="container">
+      <div class="chains-header animate-in">
+        <p class="section-label">Supported Chains</p>
+        <h2 class="section-title" style="font-size: clamp(24px, 3vw, 36px);">Every chain you care about</h2>
+      </div>
+      <div class="chains-grid animate-in">
+        <div class="chain-pill">
+          <div class="chain-icon" style="background: #627EEA;"></div>
+          Ethereum
+        </div>
+        <div class="chain-pill">
+          <div class="chain-icon" style="background: #28A0F0;"></div>
+          Arbitrum
+        </div>
+        <div class="chain-pill">
+          <div class="chain-icon" style="background: #0052FF;"></div>
+          Base
+        </div>
+        <div class="chain-pill">
+          <div class="chain-icon" style="background: #FF0420;"></div>
+          Optimism
+        </div>
+        <div class="chain-pill">
+          <div class="chain-icon" style="background: #8247E5;"></div>
+          Polygon
+        </div>
+        <div class="chain-pill">
+          <div class="chain-icon" style="background: #F3BA2F;"></div>
+          BSC
+        </div>
+        <div class="chain-pill">
+          <div class="chain-icon" style="background: #00D1FF;"></div>
+          HyperEVM
+          <span style="display:inline-block;background:rgba(0,209,255,0.15);color:#00D1FF;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:4px;">FIRST</span>
+        </div>
+        <div class="chain-pill" style="opacity:0.6;">
+          <div class="chain-icon" style="background: linear-gradient(135deg, #9945FF, #14F195);"></div>
+          Solana
+          <span style="display:inline-block;background:rgba(255,184,0,0.15);color:#FFB800;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:4px;">POSITIONS</span>
+        </div>
+      </div>
+      <p style="text-align:center; margin-top:16px; font-size:12px; color:#8E8E93;">7 EVM chains full support · Solana: positions only · HyperEVM: first aggregator support</p>
+    </div>
+  </section>
+
+  <!-- ========== WHY DIFFERENT ========== -->
+  <section class="features" style="background: #0D1135;">
+    <div class="container">
+      <div class="features-header animate-in">
+        <p class="section-label">Why 0xRadar</p>
+        <h2 class="section-title">Not another portfolio tracker</h2>
+        <p class="section-desc">We made deliberate choices that bigger platforms can't or won't make.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card animate-in" style="--accent: #00D1FF">
+          <div class="feature-icon" style="background: rgba(0,209,255,0.1)">⚡</div>
+          <h3>HyperEVM first-mover</h3>
+          <p>First aggregator to support HyperEVM. Before DeBank, Zerion, or anyone else. If you're farming HyperLiquid, we already see your positions.</p>
+          <div class="feature-tags"><span class="feature-tag">HyperEVM Exclusive</span><span class="feature-tag">First Aggregator</span></div>
+        </div>
+        <div class="feature-card animate-in" style="--accent: #FFB800">
+          <div class="feature-icon" style="background: rgba(255,184,0,0.1)">🎯</div>
+          <h3>Conservative, not spammy</h3>
+          <p>DeBank shows 500+ chains with fake volume. We show 7 chains with liquid value. No zombie L2s, no airdrop spam tokens. Quality over quantity.</p>
+          <div class="feature-tags"><span class="feature-tag">Liquid-only</span><span class="feature-tag">No Spam</span><span class="feature-tag">Real Value</span></div>
+        </div>
+        <div class="feature-card animate-in" style="--accent: #00C851">
+          <div class="feature-icon" style="background: rgba(0,200,81,0.1)">🔓</div>
+          <h3>Open source, MIT license</h3>
+          <p>Chrome extension and SDKs are open source on GitHub. No hidden analytics, no proprietary data harvest. You can audit every line before you install.</p>
+          <div class="feature-tags"><span class="feature-tag">MIT License</span><span class="feature-tag">GitHub</span><span class="feature-tag">Auditable</span></div>
+        </div>
+        <div class="feature-card animate-in" style="--accent: #FF3B30">
+          <div class="feature-icon" style="background: rgba(255,59,48,0.1)">🔔</div>
+          <h3>Telegram alerts — before liquidation</h3>
+          <p>Get notified on Telegram when your health factor drops below your threshold. <strong>@0xradarapp</strong> bot. Set up in 30 seconds with /link + /track + /threshold.</p>
+          <div class="feature-tags"><span class="feature-tag">Telegram Bot</span><span class="feature-tag">Custom Threshold</span><span class="feature-tag">Multi-Wallet</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PRICING ========== -->
+  <section class="pricing" id="pricing">
+    <div class="container">
+      <div class="pricing-header animate-in">
+        <p class="section-label">Pricing</p>
+        <h2 class="section-title">Start free, upgrade when ready</h2>
+        <p class="section-desc">From hobbyist to professional. Crypto-native payments &mdash; BTC, ETH, SOL, BNB, KAS.</p>
+      </div>
+      <!-- Email input (shared across plans) -->
+      <div style="max-width:420px; margin:0 auto 32px; text-align:center;">
+        <input type="email" id="checkout-email" placeholder="you@email.com — where we send your API key"
+               style="width:100%; padding:12px 16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:10px; color:#fff; font-size:14px; text-align:center; outline:none;"
+               autocomplete="email">
+        <p id="checkout-status" style="margin-top:8px; font-size:12px; min-height:18px;"></p>
+      </div>
+      <div class="pricing-grid">
+        <!-- Free -->
+        <div class="pricing-card animate-in">
+          <p class="pricing-tier">Free</p>
+          <p class="pricing-price">$0<span>/forever</span></p>
+          <p class="pricing-desc">Get started with basic wallet tracking.</p>
+          <ul class="pricing-features">
+            <li>
+              <svg viewBox="0 0 20 20" fill="#00C851"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              1 wallet
+            </li>
+            <li>
+              <svg viewBox="0 0 20 20" fill="#00C851"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              3 chains
+            </li>
+            <li>
+              <svg viewBox="0 0 20 20" fill="#00C851"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              Basic portfolio view
+            </li>
+            <li>
+              <svg viewBox="0 0 20 20" fill="#00C851"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              1 alert
+            </li>
+          </ul>
+          <a href="#cta" class="btn-secondary">Install Free</a>
+        </div>
+        <!-- Pro -->
+        <div class="pricing-card popular animate-in">
+          <p class="pricing-tier">Pro</p>
+          <p class="pricing-price">$9.99<span>/month</span></p>
+          <p class="pricing-desc">or $99/year (2 months free). Pay with crypto.</p>
+          <ul class="pricing-features">
+            <li>
+              <svg viewBox="0 0 20 20" fill="#00C851"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              10 wallets
+            </li>
+            <li>
+              <svg viewBox="0 0 20 20" fill="#00C851"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              All chains
+            </li>
+            <li>
+              <svg viewBox="0 0 20 20" fill="#00C851"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              All features (positions, risk, sweep)
+            </li>
+            <li>
+              <svg viewBox="0 0 20 20" fill="#00C851"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              Telegram alerts
+            </li>
+            <li>
+              <svg viewBox="0 0 20 20" fill="#00C851"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              API access (Dev tier)
+            </li>
+          </ul>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <button id="btn-subscribe-monthly" class="btn-primary" style="width:100%;justify-content:center;cursor:pointer;">Get Pro Monthly — $9.99</button>
+            <button id="btn-subscribe-yearly" class="btn-secondary" style="width:100%;justify-content:center;cursor:pointer;">Get Pro Yearly — $99</button>
+          </div>
+        </div>
+        <!-- Lifetime -->
+        <div class="pricing-card crypto-only animate-in">
+          <p class="pricing-tier">Lifetime</p>
+          <p class="pricing-price">$199<span>/once</span></p>
+          <p class="pricing-desc">Crypto only. Pro features forever, including all future updates.</p>
+          <ul class="pricing-features">
+            <li>
+              <svg viewBox="0 0 20 20" fill="#FFB800"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              Everything in Pro
+            </li>
+            <li>
+              <svg viewBox="0 0 20 20" fill="#FFB800"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              All future features included
+            </li>
+            <li>
+              <svg viewBox="0 0 20 20" fill="#FFB800"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              Pay with BTC, ETH, SOL, BNB, KAS
+            </li>
+            <li>
+              <svg viewBox="0 0 20 20" fill="#FFB800"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              No recurring payments, ever
+            </li>
+            <li>
+              <svg viewBox="0 0 20 20" fill="#FFB800"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              0.5% transaction fee only
+            </li>
+          </ul>
+          <button id="btn-buy-lifetime" class="btn-primary" style="background: linear-gradient(135deg, #FFB800, #FF8C00); color: #0A0E27; width:100%; justify-content:center; cursor:pointer;">Pay with Crypto</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== CRYPTO PAYMENT ========== -->
+  <section class="crypto-payment" id="crypto">
+    <div class="container">
+      <div class="crypto-inner">
+        <div class="crypto-left animate-in">
+          <p class="section-label">Crypto Payments</p>
+          <h2 class="section-title">Pay how you live: crypto.</h2>
+          <p class="section-desc">0xRadar is crypto-native &mdash; we only accept cryptocurrency payments. Bitcoin, Ethereum, Solana, BNB, and Kaspa. 0.5% transaction fee. No KYC for payments. No card needed.</p>
+          <div class="crypto-coins">
+            <div class="crypto-coin">
+              <div class="coin-circle" style="background: #F7931A; color: #fff;">B</div>
+              BTC
+            </div>
+            <div class="crypto-coin">
+              <div class="coin-circle" style="background: #627EEA; color: #fff;">E</div>
+              ETH
+            </div>
+            <div class="crypto-coin">
+              <div class="coin-circle" style="background: linear-gradient(135deg, #9945FF, #14F195); color: #fff;">S</div>
+              SOL
+            </div>
+            <div class="crypto-coin">
+              <div class="coin-circle" style="background: #F3BA2F; color: #fff;">B</div>
+              BNB
+            </div>
+            <div class="crypto-coin">
+              <div class="coin-circle" style="background: #00D1FF; color: #0A0E27;">K</div>
+              KAS
+            </div>
+          </div>
+          <ul class="crypto-benefits">
+            <li>
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              <span><strong>Near-zero fees</strong> &mdash; only 0.5% per transaction</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              <span><strong>No KYC</strong> &mdash; just send and go</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              <span><strong>15-min rate lock</strong> &mdash; protected from volatility</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              <span><strong>Lifetime tier exclusive</strong> &mdash; pay once, use forever</span>
+            </li>
+          </ul>
+        </div>
+        <div class="crypto-right animate-in">
+          <div class="checkout-mockup">
+            <h4>Upgrade to 0xRadar Pro</h4>
+            <div class="checkout-plan">
+              <span class="checkout-plan-label">Plan</span>
+              <span class="checkout-plan-value">Lifetime</span>
+            </div>
+            <div class="checkout-plan">
+              <span class="checkout-plan-label">Price</span>
+              <span class="checkout-plan-value">$199.00</span>
+            </div>
+            <div style="font-size: 12px; color: #8E8E93; margin: 16px 0 8px; text-align: center;">Pay with</div>
+            <div class="checkout-coins-row">
+              <div class="checkout-coin-btn">BTC</div>
+              <div class="checkout-coin-btn active">ETH</div>
+              <div class="checkout-coin-btn">SOL</div>
+              <div class="checkout-coin-btn">BNB</div>
+              <div class="checkout-coin-btn">KAS</div>
+            </div>
+            <div class="checkout-amount">
+              <div class="label">Send exactly</div>
+              <div class="value">0.07542 ETH</div>
+              <div class="fiat">&asymp; $199.00 USD</div>
+            </div>
+            <div class="checkout-timer">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Rate locked for 14:32
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== API / B2B ========== -->
+  <section class="api-section" id="api">
+    <div class="container">
+      <div class="api-inner">
+        <div class="api-left animate-in">
+          <p class="section-label">API &amp; SDK</p>
+          <h2 class="section-title">Build wallet intelligence into your app</h2>
+          <p class="section-desc">Multi-chain wallet intelligence via REST API &mdash; don't build your own backend. Available on RapidAPI or direct.</p>
+          <div class="api-tiers">
+            <div class="api-tier-badge"><strong>Free</strong> &mdash; 100 req/day</div>
+            <div class="api-tier-badge"><strong>Dev</strong> &mdash; $29/mo, 10K req/day</div>
+            <div class="api-tier-badge"><strong>Pro</strong> &mdash; $99/mo, 100K req/day</div>
+          </div>
+          <br />
+          <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px;">
+            <a href="https://docs.0xradar.app" class="btn-secondary" style="padding: 10px 24px; font-size: 14px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              API Docs
+            </a>
+            <a href="https://github.com/0xradarapp" class="btn-secondary" style="padding: 10px 24px; font-size: 14px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/></svg>
+              GitHub SDKs
+            </a>
+          </div>
+        </div>
+        <div class="api-right animate-in">
+          <div class="code-block">
+            <div class="code-block-header">
+              <div class="code-dot" style="background: #FF5F56;"></div>
+              <div class="code-dot" style="background: #FFBD2E;"></div>
+              <div class="code-dot" style="background: #27C93F;"></div>
+            </div>
+            <pre><span class="code-keyword">from</span> zeroxradar <span class="code-keyword">import</span> Client
+
+<span class="code-comment"># Initialize with your API key</span>
+<span class="code-var">client</span> = Client(api_key=<span class="code-string">"rk_live_xxx"</span>)
+
+<span class="code-comment"># Get multi-chain portfolio</span>
+<span class="code-var">portfolio</span> = client.<span class="code-func">wallet.portfolio</span>(
+    <span class="code-string">"0xABC..."</span>,
+    chains=[<span class="code-string">"eth"</span>, <span class="code-string">"base"</span>, <span class="code-string">"arb"</span>]
+)
+
+<span class="code-comment"># Check DeFi positions + health factor</span>
+<span class="code-var">positions</span> = client.<span class="code-func">positions</span>(<span class="code-string">"0xABC..."</span>)
+
+<span class="code-comment"># Score token risk</span>
+<span class="code-var">risk</span> = client.<span class="code-func">token.risk</span>(
+    <span class="code-string">"0xDEF..."</span>, chain=<span class="code-string">"eth"</span>
+)
+
+<span class="code-comment"># Calculate sweep cost</span>
+<span class="code-var">quote</span> = client.<span class="code-func">sweep.quote</span>(
+    <span class="code-keyword">from</span>=<span class="code-string">"0xABC..."</span>,
+    to=<span class="code-string">"0xGHI..."</span>,
+    chains=[<span class="code-string">"eth"</span>, <span class="code-string">"base"</span>]
+)</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== FAQ ========== -->
+  <section class="faq" id="faq">
+    <div class="container">
+      <div class="faq-header animate-in">
+        <p class="section-label">FAQ</p>
+        <h2 class="section-title">Common questions</h2>
+      </div>
+      <div class="faq-list">
+        <div class="faq-item animate-in">
+          <button class="faq-question">
+            Why another wallet tool?
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">Because nobody else combines portfolio tracking, DeFi position alerts across 5 protocols, token risk scoring, and sweep cost calculation in one place. DeBank shows balances but no alerts. Hal.xyz alerts only on Aave. 0xRadar is the unified layer.</div>
+          </div>
+        </div>
+        <div class="faq-item animate-in">
+          <button class="faq-question">
+            Is my seed phrase ever sent to your servers?
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">Never. The Chrome extension only reads public wallet addresses. Your seed phrase and private keys never leave your device. 0xRadar has zero access to your funds.</div>
+          </div>
+        </div>
+        <div class="faq-item animate-in">
+          <button class="faq-question">
+            Which chains are supported?
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">Ethereum, Arbitrum, Base, Optimism, Polygon, BSC, and HyperEVM for portfolio and token risk. Solana is supported for Kamino position tracking. More chains added based on community demand.</div>
+          </div>
+        </div>
+        <div class="faq-item animate-in">
+          <button class="faq-question">
+            How do subscriptions work with crypto?
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">Pro monthly and yearly plans are paid upfront in crypto. When your period ends, you'll receive a reminder to renew. No automatic charges &mdash; you're always in control. The Lifetime tier is pay-once, use-forever with no renewal needed.</div>
+          </div>
+        </div>
+        <div class="faq-item animate-in">
+          <button class="faq-question">
+            Why crypto-only payments?
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">We're a crypto-native tool built for crypto natives. By accepting only crypto, we keep fees at 0.5% (instead of 5%+ with card processors), avoid KYC friction, and stay aligned with our community. BTC, ETH, SOL, BNB, and KAS are all accepted.</div>
+          </div>
+        </div>
+        <div class="faq-item animate-in">
+          <button class="faq-question">
+            Is the Chrome extension open source?
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">Yes. The Chrome extension and both SDKs (Python and TypeScript) are open source under the MIT license. You can audit the code at github.com/0xradarapp. The backend API is closed source.</div>
+          </div>
+        </div>
+        <div class="faq-item animate-in">
+          <button class="faq-question">
+            What is the sweep cost calculator?
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">It calculates the exact gas cost and optimal route to consolidate tokens from multiple wallets and chains into a single destination. Perfect for airdrop farmers with many wallets, or anyone recovering forgotten funds. No other tool offers this.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== CTA ========== -->
+  <section class="cta" id="cta">
+    <div class="container">
+      <div class="cta-inner animate-in">
+        <p class="section-label">Get Started</p>
+        <h2 class="section-title">Ready to see every wallet<br />and catch every risk?</h2>
+        <p class="section-desc">Start free with one wallet on 3 chains. Upgrade to Pro with crypto when you need more. Or go Lifetime and never pay again.</p>
+        <div class="cta-buttons">
+          <a href="#" class="btn-primary" style="font-size: 16px; padding: 16px 40px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+            Install Free Extension
+          </a>
+          <a href="#api" class="btn-secondary" style="font-size: 16px; padding: 16px 40px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            Explore the API
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="footer" id="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div style="display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px;">
+            <span class="mono cyan">0x</span>Radar
+          </div>
+          <p>The multi-chain wallet intelligence platform. Portfolio, alerts, risk, and sweep &mdash; in one extension.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="#features">Chrome Extension</a></li>
+            <li><a href="#api">API</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="https://status.0xradar.app" target="_blank" rel="noopener">Status</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="https://docs.0xradar.app" target="_blank" rel="noopener">Documentation</a></li>
+            <li><a href="https://github.com/0xradarapp" target="_blank" rel="noopener">GitHub</a></li>
+            <li><a href="#">Changelog</a></li>
+            <li><a href="#">Blog</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms of Service</a></li>
+            <li><a href="refund.html">Refund Policy</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p class="footer-copy">&copy; 2026 0xRadar &bull; Made by crypto natives &bull; Pay with crypto</p>
+        <div class="footer-socials">
+          <a href="https://twitter.com/0xradarapp" target="_blank" rel="noopener" class="footer-social" aria-label="Twitter">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+          <a href="https://github.com/0xradarapp" target="_blank" rel="noopener" class="footer-social" aria-label="GitHub">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========== SCRIPTS ========== -->
+  <script>
+    // Navbar scroll effect
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    // Mobile menu toggle
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const navLinks = document.getElementById('navLinks');
+    mobileMenuBtn.addEventListener('click', () => {
+      navLinks.classList.toggle('open');
+    });
+    // Close mobile menu on link click
+    navLinks.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => navLinks.classList.remove('open'));
+    });
+
+    // Scroll animations
+    const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, index) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            entry.target.classList.add('visible');
+          }, index * 100);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+    document.querySelectorAll('.animate-in').forEach(el => observer.observe(el));
+
+    // FAQ accordion
+    document.querySelectorAll('.faq-question').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = btn.parentElement;
+        const wasOpen = item.classList.contains('open');
+        // Close all
+        document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+        // Toggle current
+        if (!wasOpen) item.classList.add('open');
+      });
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        const href = this.getAttribute('href');
+        if (href === '#') return;
+        e.preventDefault();
+        const target = document.querySelector(href);
+        if (target) {
+          const offset = 80;
+          const top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+          window.scrollTo({ top, behavior: 'smooth' });
+        }
+      });
+    });
+
+    // Checkout mockup coin selector
+    document.querySelectorAll('.checkout-coin-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.checkout-coin-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  </script>
+
+  <!-- ========== CRYPTO CHECKOUT MODAL ========== -->
+  <div id="crypto-modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(4px); z-index:9999; align-items:center; justify-content:center;">
+    <div id="crypto-modal" style="background:#0D1135; border:1px solid rgba(255,184,0,0.3); border-radius:20px; padding:36px; max-width:440px; width:90%; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.5); display:none;">
+      <h3 style="text-align:center; font-size:20px; font-weight:700; margin-bottom:4px;">Buy Lifetime Access</h3>
+      <p style="text-align:center; color:#8E8E93; font-size:13px; margin-bottom:20px;">$199 one-time · Pay with crypto</p>
+
+      <!-- Coin selection -->
+      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:20px;">
+        <button class="checkout-coin-btn" data-coin="btc" style="padding:10px 16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px; color:#F7931A; font-weight:700; font-size:14px; cursor:pointer; transition:all 0.2s;">₿ BTC</button>
+        <button class="checkout-coin-btn active" data-coin="eth" style="padding:10px 16px; background:rgba(98,126,234,0.15); border:1px solid #627EEA; border-radius:10px; color:#627EEA; font-weight:700; font-size:14px; cursor:pointer; transition:all 0.2s;">Ξ ETH</button>
+        <button class="checkout-coin-btn" data-coin="sol" style="padding:10px 16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px; color:#14F195; font-weight:700; font-size:14px; cursor:pointer; transition:all 0.2s;">◎ SOL</button>
+        <button class="checkout-coin-btn" data-coin="bnb" style="padding:10px 16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px; color:#F3BA2F; font-weight:700; font-size:14px; cursor:pointer; transition:all 0.2s;">◆ BNB</button>
+        <button class="checkout-coin-btn" data-coin="kas" style="padding:10px 16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px; color:#00D1FF; font-weight:700; font-size:14px; cursor:pointer; transition:all 0.2s;">K KAS</button>
+      </div>
+
+      <!-- Order summary -->
+      <div style="background:rgba(255,255,255,0.03); border-radius:12px; padding:20px; margin-bottom:20px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:#8E8E93; font-size:13px;">Plan</span><span style="font-weight:700;">Lifetime Access</span></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:#8E8E93; font-size:13px;">Price</span><span style="font-weight:700;">$199.00</span></div>
+        <div style="display:flex; justify-content:space-between;"><span style="color:#8E8E93; font-size:13px;">Fee</span><span style="color:#00C851;">~0.5%</span></div>
+      </div>
+
+      <!-- Confirm button -->
+      <button id="btn-confirm-crypto" style="width:100%; padding:14px; background:linear-gradient(135deg,#FFB800,#FF8C00); color:#0A0E27; border:none; border-radius:12px; font-size:16px; font-weight:700; cursor:pointer; transition:opacity 0.2s;">Pay with ETH — $199</button>
+
+      <!-- Close hint -->
+      <p style="text-align:center; color:#8E8E93; font-size:11px; margin-top:16px;">Press ESC or click outside to close</p>
+    </div>
+  </div>
+
+  <!-- Checkout JS -->
+  <script src="checkout.js"></script>
+</body>
+</html>

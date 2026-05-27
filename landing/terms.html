@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms of Service — 0xRadar</title>
+  <meta name="description" content="0xRadar Terms of Service. Read the terms governing your use of the 0xRadar Chrome extension, API, and related services." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%2300D1FF'/><path d='M16 8 L16 24 M8 16 L24 16' stroke='%230A0E27' stroke-width='3' stroke-linecap='round'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0A0E27; color: #E0E0E0; line-height: 1.7; }
+    a { color: #00D1FF; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    .navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 14px 0; background: rgba(10,14,39,0.95); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,209,255,0.1); }
+    .navbar .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 20px; color: #fff; text-decoration: none; }
+    .nav-logo:hover { text-decoration: none; }
+    .nav-logo-icon { width: 32px; height: 32px; border-radius: 8px; background: rgba(0,209,255,0.15); display: flex; align-items: center; justify-content: center; }
+    .nav-logo-icon svg { width: 20px; height: 20px; }
+    .nav-back { font-size: 14px; color: #8E8E93; display: flex; align-items: center; gap: 6px; transition: color 0.2s; }
+    .nav-back:hover { color: #00D1FF; text-decoration: none; }
+
+    .page-header { padding: 140px 0 60px; text-align: center; background: linear-gradient(180deg, #0D1135 0%, #0A0E27 100%); }
+    .page-header h1 { font-size: clamp(32px, 5vw, 48px); font-weight: 800; color: #fff; letter-spacing: -1px; margin-bottom: 12px; }
+    .page-header p { font-size: 15px; color: #8E8E93; }
+
+    .content { max-width: 760px; margin: 0 auto; padding: 60px 24px 100px; }
+    .content h2 { font-size: 22px; font-weight: 700; color: #FFFFFF; margin: 48px 0 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .content h2:first-child { margin-top: 0; border-top: none; padding-top: 0; }
+    .content h3 { font-size: 17px; font-weight: 600; color: #C0C0C0; margin: 24px 0 10px; }
+    .content p { margin-bottom: 16px; font-size: 15px; }
+    .content ul, .content ol { margin: 12px 0 20px 20px; }
+    .content li { margin-bottom: 8px; font-size: 15px; }
+    .content strong { color: #FFFFFF; }
+    .content code { font-family: 'JetBrains Mono', monospace; background: rgba(0,209,255,0.08); color: #00D1FF; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+
+    .last-updated { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: rgba(0,209,255,0.08); border: 1px solid rgba(0,209,255,0.15); border-radius: 8px; font-size: 13px; color: #8E8E93; margin-top: 16px; }
+
+    .highlight-box { background: rgba(0,209,255,0.05); border: 1px solid rgba(0,209,255,0.15); border-radius: 12px; padding: 20px 24px; margin: 20px 0; }
+    .highlight-box p { margin-bottom: 0; }
+
+    .footer { background: #080B1E; border-top: 1px solid rgba(255,255,255,0.06); padding: 32px 0; text-align: center; }
+    .footer p { font-size: 13px; color: #8E8E93; }
+
+    @media (max-width: 768px) {
+      .page-header { padding: 120px 0 40px; }
+      .content { padding: 40px 20px 80px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-logo">
+        <div class="nav-logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="9" stroke="#00D1FF" stroke-width="1.5" stroke-dasharray="3 6" opacity="0.5"/>
+            <circle cx="12" cy="12" r="5" stroke="#00D1FF" stroke-width="1.5" opacity="0.8"/>
+            <circle cx="12" cy="12" r="1.5" fill="#00D1FF"/>
+            <line x1="12" y1="2" x2="12" y2="6" stroke="#00D1FF" stroke-width="1.5" opacity="0.4"/>
+            <line x1="12" y1="18" x2="12" y2="22" stroke="#00D1FF" stroke-width="1.5" opacity="0.4"/>
+            <line x1="2" y1="12" x2="6" y2="12" stroke="#00D1FF" stroke-width="1.5" opacity="0.4"/>
+            <line x1="18" y1="12" x2="22" y2="12" stroke="#00D1FF" stroke-width="1.5" opacity="0.4"/>
+          </svg>
+        </div>
+        <span><span class="mono" style="color:#00D1FF">0x</span>Radar</span>
+      </a>
+      <a href="index.html" class="nav-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to Home
+      </a>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1>Terms of Service</h1>
+    <p>The terms governing your use of 0xRadar services.</p>
+    <div class="last-updated">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Last updated: May 27, 2026
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <h2>1. Acceptance of Terms</h2>
+    <p>These Terms of Service ("Terms") govern your access to and use of the 0xRadar website, Chrome browser extension, API services, and all related features (collectively, the "Service"). The Service is operated by 0xRadar ("we", "us", or "our").</p>
+    <p>By accessing or using the Service, you agree to be bound by these Terms. If you do not agree, you may not use the Service.</p>
+    <div class="highlight-box">
+      <p><strong>You must be at least 18 years old</strong> to use 0xRadar. By using the Service, you represent and warrant that you are at least 18 years of age.</p>
+    </div>
+
+    <h2>2. Description of Service</h2>
+    <p>0xRadar is a multi-chain cryptocurrency wallet intelligence platform that provides:</p>
+    <ul>
+      <li><strong>Portfolio tracking</strong> &mdash; aggregated view of token balances and NFT counts across multiple blockchain networks.</li>
+      <li><strong>DeFi position monitoring</strong> &mdash; tracking of lending protocol positions, health factors, and liquidation risk.</li>
+      <li><strong>Alerts</strong> &mdash; Telegram-based notifications for liquidation risk, health factor thresholds, and other wallet events.</li>
+      <li><strong>Token risk scoring</strong> &mdash; automated risk assessment for tokens in your wallet (honeypot detection, holder concentration, contract analysis, etc.).</li>
+      <li><strong>Sweep cost calculator</strong> &mdash; gas cost estimation for consolidating tokens across wallets and chains.</li>
+      <li><strong>API access</strong> &mdash; programmatic access to wallet intelligence data via REST API and SDKs.</li>
+    </ul>
+
+    <h2>3. Account &amp; Authentication</h2>
+    <h3>3.1 Chrome Extension Users</h3>
+    <p>The Chrome Extension can be used without creating an account for the Free tier. When you upgrade to a paid tier, an account is created using your API key as the primary identifier.</p>
+    <h3>3.2 API Users</h3>
+    <p>API access requires an API key obtained through RapidAPI or direct registration. You are responsible for keeping your API key confidential. If you believe your key has been compromised, you must rotate it immediately through the dashboard or contact us.</p>
+    <h3>3.3 Account Security</h3>
+    <p>You are responsible for maintaining the security of your account credentials. 0xRadar will never ask for your seed phrase, private keys, or passwords.</p>
+
+    <h2>4. Payment Terms</h2>
+    <div class="highlight-box">
+      <p><strong>0xRadar accepts cryptocurrency payments exclusively.</strong> We accept Bitcoin (BTC), Ethereum (ETH), Solana (SOL), BNB, and Kaspa (KAS). No credit card, PayPal, or other fiat payment methods are available.</p>
+    </div>
+
+    <h3>4.1 Pricing</h3>
+    <p>Current pricing is listed on our <a href="index.html#pricing">pricing page</a>. All prices are denominated in USD. The equivalent cryptocurrency amount is calculated at the time of payment using a live exchange rate.</p>
+
+    <h3>4.2 Payment Process</h3>
+    <ol>
+      <li>You select a plan and cryptocurrency.</li>
+      <li>We generate a payment quote with a locked exchange rate, valid for <strong>15 minutes</strong>.</li>
+      <li>You send the exact cryptocurrency amount to the provided deposit address.</li>
+      <li>Upon blockchain confirmation, your subscription or purchase is activated.</li>
+    </ol>
+
+    <h3>4.3 Subscription Renewals</h3>
+    <p>Crypto subscriptions are paid upfront for the billing period (monthly or yearly). There are no automatic recurring charges. Before your period ends, you will receive a reminder to renew manually. Failure to renew will result in downgrade to the Free tier.</p>
+
+    <h3>4.4 Lifetime Tier</h3>
+    <p>The Lifetime tier is a one-time payment that grants permanent access to all Pro features and future updates. No renewal is required. The Lifetime tier is available exclusively via cryptocurrency payment.</p>
+
+    <h2>5. Free &amp; Paid Tiers</h2>
+    <table style="width:100%; border-collapse:collapse; margin: 16px 0;">
+      <thead>
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+          <th style="text-align:left; padding:10px; color:#fff; font-size:14px;">Feature</th>
+          <th style="text-align:center; padding:10px; color:#fff; font-size:14px;">Free</th>
+          <th style="text-align:center; padding:10px; color:#fff; font-size:14px;">Pro</th>
+          <th style="text-align:center; padding:10px; color:#fff; font-size:14px;">Lifetime</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <td style="padding:10px; font-size:14px;">Wallets</td>
+          <td style="padding:10px; font-size:14px; text-align:center;">1</td>
+          <td style="padding:10px; font-size:14px; text-align:center;">10</td>
+          <td style="padding:10px; font-size:14px; text-align:center;">10+</td>
+        </tr>
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <td style="padding:10px; font-size:14px;">Chains</td>
+          <td style="padding:10px; font-size:14px; text-align:center;">3</td>
+          <td style="padding:10px; font-size:14px; text-align:center;">All</td>
+          <td style="padding:10px; font-size:14px; text-align:center;">All</td>
+        </tr>
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <td style="padding:10px; font-size:14px;">Alerts</td>
+          <td style="padding:10px; font-size:14px; text-align:center;">1</td>
+          <td style="padding:10px; font-size:14px; text-align:center;">Unlimited</td>
+          <td style="padding:10px; font-size:14px; text-align:center;">Unlimited</td>
+        </tr>
+        <tr>
+          <td style="padding:10px; font-size:14px;">API Access</td>
+          <td style="padding:10px; font-size:14px; text-align:center;">&mdash;</td>
+          <td style="padding:10px; font-size:14px; text-align:center;">Dev tier</td>
+          <td style="padding:10px; font-size:14px; text-align:center;">Dev tier</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>We reserve the right to modify pricing and tier features with 30 days' notice. Existing subscriptions will be honored at the original price until the end of the current billing period.</p>
+
+    <h2>6. Acceptable Use</h2>
+    <p>You agree <strong>not</strong> to:</p>
+    <ul>
+      <li>Reverse-engineer, decompile, or disassemble the 0xRadar backend (the Chrome Extension and SDKs are open source under MIT license).</li>
+      <li>Use the Service for any illegal purpose, including money laundering, fraud, or market manipulation.</li>
+      <li>Attempt to circumvent rate limits, access controls, or other security measures.</li>
+      <li>Resell, redistribute, or sublicense access to the Service without written permission.</li>
+      <li>Use the API to build a competing wallet intelligence service.</li>
+      <li>Transmit malware, spam, or malicious code through the Service.</li>
+      <li>Scrape or excessively query the Service beyond published rate limits.</li>
+      <li>Impersonate other users, projects, or entities.</li>
+    </ul>
+    <p>Violation of these terms may result in immediate suspension or termination of your account without refund.</p>
+
+    <h2>7. Intellectual Property</h2>
+    <ul>
+      <li><strong>Open source</strong> &mdash; The Chrome Extension, Python SDK (<code>zeroxradar</code>), and TypeScript SDK (<code>@0xradar/sdk</code>) are released under the MIT License. See individual repositories at <a href="https://github.com/0xradarapp" target="_blank" rel="noopener">github.com/0xradarapp</a>.</li>
+      <li><strong>Proprietary</strong> &mdash; The 0xRadar backend, API, brand name, logo, and website design are proprietary. You may not use the 0xRadar name, logo, or brand without written permission.</li>
+      <li><strong>User data</strong> &mdash; You retain ownership of your wallet addresses and data. You grant us a limited license to process this data to provide the Service.</li>
+    </ul>
+
+    <h2>8. Disclaimers</h2>
+    <p><strong>The Service is provided "as is" and "as available" without warranties of any kind.</strong></p>
+    <ul>
+      <li>We do <strong>not</strong> guarantee the accuracy, completeness, or timeliness of blockchain data, token prices, risk scores, health factors, or sweep cost estimates.</li>
+      <li>Risk scores are <strong>informational only</strong> and do not constitute financial, investment, or legal advice.</li>
+      <li>We are <strong>not responsible</strong> for financial losses resulting from reliance on data provided by the Service, including but not limited to missed liquidation alerts, inaccurate risk assessments, or incorrect sweep calculations.</li>
+      <li>We are <strong>not a financial institution</strong>. 0xRadar does not hold, custody, or manage your cryptocurrency. We never have access to your private keys or funds.</li>
+      <li>Blockchain data is sourced from third-party RPC providers (Alchemy, Helius, etc.) and may be subject to delays, errors, or outages beyond our control.</li>
+      <li>Cryptocurrency prices are volatile. Payment quotes are locked for 15 minutes only. We are not responsible for price fluctuations.</li>
+    </ul>
+
+    <h2>9. Limitation of Liability</h2>
+    <p>To the maximum extent permitted by applicable law:</p>
+    <ul>
+      <li>0xRadar shall <strong>not be liable</strong> for any indirect, incidental, special, consequential, or punitive damages arising from your use of the Service.</li>
+      <li>Our total cumulative liability shall not exceed the amount you paid to 0xRadar in the <strong>12 months preceding the claim</strong>.</li>
+      <li>We are not liable for losses due to blockchain network issues, smart contract vulnerabilities, third-party service outages, or force majeure events.</li>
+    </ul>
+
+    <h2>10. Service Availability</h2>
+    <p>We strive to maintain 99.5% uptime but do not guarantee uninterrupted service. Scheduled maintenance will be communicated in advance when possible. We reserve the right to modify, suspend, or discontinue any part of the Service with reasonable notice.</p>
+
+    <h2>11. Termination</h2>
+    <h3>11.1 By You</h3>
+    <p>You may stop using the Service at any time. To delete your account and data, contact <strong>support@0xradar.app</strong>.</p>
+    <h3>11.2 By Us</h3>
+    <p>We may suspend or terminate your access if:</p>
+    <ul>
+      <li>You violate these Terms.</li>
+      <li>Your payment is reversed, charged back, or deemed fraudulent.</li>
+      <li>Prolonged inactivity (12+ months with no API calls or extension activity).</li>
+    </ul>
+    <p>We will provide notice and an opportunity to cure (when feasible) before termination for cause.</p>
+
+    <h2>12. API-Specific Terms</h2>
+    <ul>
+      <li><strong>Rate limits</strong> are enforced per API key and tier. Exceeding rate limits will result in temporary request throttling (HTTP 429).</li>
+      <li><strong>Data attribution</strong> &mdash; if you display 0xRadar data in a public-facing application, you must attribute the data source to "0xRadar".</li>
+      <li><strong>RapidAPI distribution</strong> &mdash; API access sold through RapidAPI is additionally subject to RapidAPI's Terms of Service.</li>
+      <li><strong>SLA</strong> &mdash; no formal SLA is provided at this time. We target 99.5% availability on a best-effort basis.</li>
+    </ul>
+
+    <h2>13. Governing Law &amp; Dispute Resolution</h2>
+    <p>These Terms are governed by the laws of the jurisdiction in which 0xRadar's operator is established. Any disputes shall first be attempted to be resolved through good-faith negotiation. If negotiation fails, disputes shall be resolved through binding arbitration.</p>
+    <p>You waive any right to participate in class action lawsuits or class-wide arbitration.</p>
+
+    <h2>14. Changes to These Terms</h2>
+    <p>We may update these Terms periodically. Material changes will be communicated via:</p>
+    <ul>
+      <li>A notice on the 0xRadar website.</li>
+      <li>An email notification (if you have provided your email).</li>
+      <li>An updated "Last updated" date at the top of this page.</li>
+    </ul>
+    <p>Your continued use of the Service after changes take effect constitutes acceptance of the revised Terms.</p>
+
+    <h2>15. Severability</h2>
+    <p>If any provision of these Terms is found to be unenforceable or invalid, the remaining provisions shall continue in full force and effect.</p>
+
+    <h2>16. Contact</h2>
+    <p>For questions about these Terms:</p>
+    <ul>
+      <li>Email: <strong>legal@0xradar.app</strong></li>
+      <li>Twitter: <a href="https://twitter.com/0xradarapp" target="_blank" rel="noopener">@0xradarapp</a></li>
+      <li>GitHub: <a href="https://github.com/0xradarapp" target="_blank" rel="noopener">github.com/0xradarapp</a></li>
+    </ul>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2026 0xRadar &bull; <a href="index.html">Home</a> &bull; <a href="privacy.html">Privacy</a> &bull; <a href="refund.html">Refunds</a></p>
+  </footer>
+
+</body>
+</html>

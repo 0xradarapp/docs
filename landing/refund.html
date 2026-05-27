@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Refund Policy — 0xRadar</title>
+  <meta name="description" content="0xRadar Refund Policy. Learn about our refund process for crypto payments, eligibility, and how to request a refund." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%2300D1FF'/><path d='M16 8 L16 24 M8 16 L24 16' stroke='%230A0E27' stroke-width='3' stroke-linecap='round'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0A0E27; color: #E0E0E0; line-height: 1.7; }
+    a { color: #00D1FF; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    .navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 14px 0; background: rgba(10,14,39,0.95); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,209,255,0.1); }
+    .navbar .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 20px; color: #fff; text-decoration: none; }
+    .nav-logo:hover { text-decoration: none; }
+    .nav-logo-icon { width: 32px; height: 32px; border-radius: 8px; background: rgba(0,209,255,0.15); display: flex; align-items: center; justify-content: center; }
+    .nav-logo-icon svg { width: 20px; height: 20px; }
+    .nav-back { font-size: 14px; color: #8E8E93; display: flex; align-items: center; gap: 6px; transition: color 0.2s; }
+    .nav-back:hover { color: #00D1FF; text-decoration: none; }
+
+    .page-header { padding: 140px 0 60px; text-align: center; background: linear-gradient(180deg, #0D1135 0%, #0A0E27 100%); }
+    .page-header h1 { font-size: clamp(32px, 5vw, 48px); font-weight: 800; color: #fff; letter-spacing: -1px; margin-bottom: 12px; }
+    .page-header p { font-size: 15px; color: #8E8E93; }
+
+    .content { max-width: 760px; margin: 0 auto; padding: 60px 24px 100px; }
+    .content h2 { font-size: 22px; font-weight: 700; color: #FFFFFF; margin: 48px 0 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .content h2:first-child { margin-top: 0; border-top: none; padding-top: 0; }
+    .content h3 { font-size: 17px; font-weight: 600; color: #C0C0C0; margin: 24px 0 10px; }
+    .content p { margin-bottom: 16px; font-size: 15px; }
+    .content ul, .content ol { margin: 12px 0 20px 20px; }
+    .content li { margin-bottom: 8px; font-size: 15px; }
+    .content strong { color: #FFFFFF; }
+    .content code { font-family: 'JetBrains Mono', monospace; background: rgba(0,209,255,0.08); color: #00D1FF; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+
+    .last-updated { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: rgba(0,209,255,0.08); border: 1px solid rgba(0,209,255,0.15); border-radius: 8px; font-size: 13px; color: #8E8E93; margin-top: 16px; }
+
+    .highlight-box { background: rgba(0,209,255,0.05); border: 1px solid rgba(0,209,255,0.15); border-radius: 12px; padding: 20px 24px; margin: 20px 0; }
+    .highlight-box.green { background: rgba(0,200,81,0.06); border-color: rgba(0,200,81,0.2); }
+    .highlight-box.amber { background: rgba(255,184,0,0.06); border-color: rgba(255,184,0,0.2); }
+    .highlight-box p { margin-bottom: 0; }
+
+    .refund-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+    .refund-table th { text-align: left; padding: 12px; color: #fff; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .refund-table td { padding: 12px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .refund-table .green-text { color: #00C851; font-weight: 600; }
+    .refund-table .amber-text { color: #FFB800; font-weight: 600; }
+    .refund-table .red-text { color: #FF3B30; font-weight: 600; }
+
+    .step-list { counter-reset: steps; list-style: none; margin: 16px 0; padding: 0; }
+    .step-list li { counter-increment: steps; display: flex; gap: 16px; margin-bottom: 16px; }
+    .step-list li::before { content: counter(steps); display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(0,209,255,0.1); color: #00D1FF; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+
+    .footer { background: #080B1E; border-top: 1px solid rgba(255,255,255,0.06); padding: 32px 0; text-align: center; }
+    .footer p { font-size: 13px; color: #8E8E93; }
+
+    @media (max-width: 768px) {
+      .page-header { padding: 120px 0 40px; }
+      .content { padding: 40px 20px 80px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-logo">
+        <div class="nav-logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="9" stroke="#00D1FF" stroke-width="1.5" stroke-dasharray="3 6" opacity="0.5"/>
+            <circle cx="12" cy="12" r="5" stroke="#00D1FF" stroke-width="1.5" opacity="0.8"/>
+            <circle cx="12" cy="12" r="1.5" fill="#00D1FF"/>
+            <line x1="12" y1="2" x2="12" y2="6" stroke="#00D1FF" stroke-width="1.5" opacity="0.4"/>
+            <line x1="12" y1="18" x2="12" y2="22" stroke="#00D1FF" stroke-width="1.5" opacity="0.4"/>
+            <line x1="2" y1="12" x2="6" y2="12" stroke="#00D1FF" stroke-width="1.5" opacity="0.4"/>
+            <line x1="18" y1="12" x2="22" y2="12" stroke="#00D1FF" stroke-width="1.5" opacity="0.4"/>
+          </svg>
+        </div>
+        <span><span class="mono" style="color:#00D1FF">0x</span>Radar</span>
+      </a>
+      <a href="index.html" class="nav-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to Home
+      </a>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1>Refund Policy</h1>
+    <p>Our crypto refund process, eligibility, and timeframes.</p>
+    <div class="last-updated">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Last updated: May 27, 2026
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <h2>1. Overview</h2>
+    <div class="highlight-box green">
+      <p><strong>We want you to be satisfied.</strong> If 0xRadar doesn't meet your expectations, we offer a straightforward refund process. Since all payments are in cryptocurrency, refunds are issued in USDT or USDC to protect against price volatility.</p>
+    </div>
+
+    <h2>2. Refund Eligibility by Plan</h2>
+    <table class="refund-table">
+      <thead>
+        <tr>
+          <th>Plan</th>
+          <th>Refund Window</th>
+          <th>Refund Amount</th>
+          <th>Method</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Free</strong></td>
+          <td class="green-text">N/A</td>
+          <td>&mdash;</td>
+          <td>&mdash;</td>
+        </tr>
+        <tr>
+          <td><strong>Pro Monthly</strong><br /><span style="font-size:12px; color:#8E8E93;">$9.99/month</span></td>
+          <td class="amber-text">7 days</td>
+          <td>100% of payment</td>
+          <td>USDT or USDC</td>
+        </tr>
+        <tr>
+          <td><strong>Pro Yearly</strong><br /><span style="font-size:12px; color:#8E8E93;">$99/year</span></td>
+          <td class="green-text">30 days</td>
+          <td>100% of payment</td>
+          <td>USDT or USDC</td>
+        </tr>
+        <tr>
+          <td><strong>Lifetime</strong><br /><span style="font-size:12px; color:#8E8E93;">$199 once</span></td>
+          <td class="amber-text">14 days</td>
+          <td>100% of payment</td>
+          <td>USDT or USDC</td>
+        </tr>
+        <tr>
+          <td><strong>API (RapidAPI)</strong><br /><span style="font-size:12px; color:#8E8E93;">Dev / Pro</span></td>
+          <td>7 days</td>
+          <td>Per RapidAPI policy</td>
+          <td>RapidAPI handles</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. Refund Conditions</h2>
+
+    <h3>3.1 Eligible Refunds</h3>
+    <p>You qualify for a full refund if:</p>
+    <ul>
+      <li>Your request is submitted <strong>within the refund window</strong> (7 days for monthly Pro, 30 days for yearly Pro, 14 days for Lifetime).</li>
+      <li>You have <strong>not engaged in fraud, abuse, or Terms of Service violations</strong>.</li>
+      <li>You provide the <strong>transaction hash (txid)</strong> of your original payment for verification.</li>
+    </ul>
+
+    <h3>3.2 Non-Refundable Situations</h3>
+    <p>Refunds will <strong>not</strong> be issued if:</p>
+    <ul>
+      <li>The refund window has expired.</li>
+      <li>Your account has been terminated for Terms of Service violations.</li>
+      <li>You have already received a partial refund or credit for the same payment.</li>
+      <li>The payment was flagged as fraudulent, reversed, or charged back.</li>
+    </ul>
+
+    <h2>4. How Refunds Work with Crypto</h2>
+    <div class="highlight-box">
+      <p><strong>All refunds are issued in USDT (Tether) or USDC (USD Coin)</strong> to protect both parties from cryptocurrency price volatility. The refund amount is calculated based on the <strong>USD value at the time of your original payment</strong>, not the current market price.</p>
+    </div>
+
+    <h3>4.1 Why USDT/USDC?</h3>
+    <ul>
+      <li><strong>Predictability</strong> &mdash; you receive the same USD value you paid, regardless of crypto market movements.</li>
+      <li><strong>Speed</strong> &mdash; stablecoin transfers settle in minutes on most networks.</li>
+      <li><strong>Low fees</strong> &mdash; USDT/USDC on L2 networks (Arbitrum, Base) costs pennies to transfer.</li>
+    </ul>
+
+    <h3>4.2 Example</h3>
+    <p>You purchased Lifetime for <strong>$199</strong> and paid <strong>0.075 ETH</strong>.</p>
+    <p>Within 14 days, you request a refund.</p>
+    <p>We issue <strong>$199 USDT</strong> (on your preferred network: Ethereum, Arbitrum, Base, or Solana) to a wallet address you provide.</p>
+
+    <h2>5. How to Request a Refund</h2>
+    <ol class="step-list">
+      <li><div><strong>Email us</strong> at <strong>refund@0xradar.app</strong> with the subject line "Refund Request". Include your API key (or wallet address used for payment), the transaction hash, and the reason for the refund.</div></li>
+      <li><div><strong>We verify</strong> the payment and check eligibility within <strong>2 business days</strong>.</div></li>
+      <li><div><strong>We confirm</strong> the refund amount and ask you to provide a wallet address for receiving USDT/USDC.</div></li>
+      <li><div><strong>We send</strong> the refund within <strong>5 business days</strong> of confirmation. You will receive a transaction hash for tracking.</div></li>
+      <li><div><strong>Your account</strong> is downgraded to the Free tier upon refund issuance.</div></li>
+    </ol>
+
+    <h2>6. Partial Refunds &amp; Credits</h2>
+    <p>In some cases, we may offer a partial refund or account credit as an alternative:</p>
+    <ul>
+      <li><strong>Yearly plan, after 30 days but before 6 months</strong> &mdash; we may offer a prorated credit for the remaining months, applicable toward future purchases.</li>
+      <li><strong>Service outages</strong> &mdash; if we experience extended downtime (&gt;24 hours), affected paid users will receive a credit equal to the proportional subscription value.</li>
+      <li><strong>Overpayment</strong> &mdash; if you accidentally send more than the required amount, the excess will be refunded in full (in the same cryptocurrency or USDT).</li>
+    </ul>
+
+    <h2>7. RapidAPI Refunds</h2>
+    <p>If you subscribed to 0xRadar through <strong>RapidAPI</strong>, refunds are handled according to RapidAPI's refund policy. Please contact RapidAPI support directly or email us at <strong>refund@0xradar.app</strong> and we will coordinate with RapidAPI on your behalf.</p>
+
+    <h2>8. Transaction Fees</h2>
+    <ul>
+      <li><strong>0xRadar covers the gas/network fee</strong> for sending your refund. You receive the full refund amount.</li>
+      <li>The original transaction fee you paid to send your payment is <strong>not refundable</strong> (this is a blockchain network fee, not collected by 0xRadar).</li>
+    </ul>
+
+    <h2>9. Disputes</h2>
+    <p>If you disagree with a refund decision, you may appeal by emailing <strong>legal@0xradar.app</strong> within 14 days of the decision. We will review your case and respond within 10 business days.</p>
+
+    <h2>10. Changes to This Policy</h2>
+    <p>We may update this Refund Policy periodically. Any changes that reduce refund windows or amounts will only apply to <strong>new purchases</strong> made after the update date. Existing purchases retain the policy that was in effect at the time of payment.</p>
+
+    <h2>11. Contact</h2>
+    <p>For refund requests or questions:</p>
+    <ul>
+      <li><strong>Refund requests:</strong> refund@0xradar.app</li>
+      <li><strong>Disputes:</strong> legal@0xradar.app</li>
+      <li><strong>General support:</strong> support@0xradar.app</li>
+      <li>Twitter: <a href="https://twitter.com/0xradarapp" target="_blank" rel="noopener">@0xradarapp</a></li>
+    </ul>
+
+    <div class="highlight-box green" style="margin-top: 40px;">
+      <p><strong>Summary:</strong> 7-day money-back for Pro monthly. 30-day for Pro yearly. 14-day for Lifetime. All refunds in USDT/USDC at original USD value. No questions asked within the window. Email refund@0xradar.app to start.</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2026 0xRadar &bull; <a href="index.html">Home</a> &bull; <a href="privacy.html">Privacy</a> &bull; <a href="terms.html">Terms</a></p>
+  </footer>
+
+</body>
+</html>

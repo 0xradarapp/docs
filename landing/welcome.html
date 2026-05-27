@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to 0xRadar — Setup Complete</title>
+  <meta name="description" content="Your 0xRadar payment is confirmed. Check your email for your API key and get started." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%2300C851'/><path d='M8 16l5 5 10-10' stroke='%230A0E27' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0A0E27; color: #FFFFFF; line-height: 1.6; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .card { background: #0D1135; border: 1px solid rgba(0,209,255,0.12); border-radius: 24px; padding: 48px 40px; max-width: 560px; width: 100%; text-align: center; }
+    .check-circle { width: 72px; height: 72px; border-radius: 50%; background: rgba(0,200,81,0.12); border: 3px solid rgba(0,200,81,0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; }
+    .check-circle svg { width: 32px; height: 32px; color: #00C851; }
+    .badge { display: inline-block; padding: 6px 16px; border-radius: 100px; font-size: 12px; font-weight: 700; margin-bottom: 16px; }
+    .badge-pro { background: rgba(0,209,255,0.1); color: #00D1FF; border: 1px solid rgba(0,209,255,0.2); }
+    .badge-lifetime { background: rgba(255,184,0,0.1); color: #FFB800; border: 1px solid rgba(255,184,0,0.2); }
+    h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
+    .subtitle { font-size: 15px; color: #8E8E93; margin-bottom: 32px; line-height: 1.7; }
+    .info-box { background: rgba(0,209,255,0.04); border: 1px solid rgba(0,209,255,0.1); border-radius: 14px; padding: 20px 24px; margin-bottom: 24px; text-align: left; }
+    .info-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { font-size: 13px; color: #8E8E93; }
+    .info-value { font-size: 13px; font-weight: 600; }
+    .api-key-hint { background: rgba(255,184,0,0.08); border: 1px solid rgba(255,184,0,0.15); border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; }
+    .api-key-hint p { font-size: 13px; color: #FFB800; line-height: 1.6; }
+    .code-box { background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 16px 20px; margin-bottom: 24px; text-align: left; overflow-x: auto; }
+    .code-box code { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #00D1FF; line-height: 1.8; white-space: pre; }
+    .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: #00D1FF; color: #0A0E27; }
+    .btn-primary:hover { background: #33DAFF; transform: translateY(-1px); }
+    .btn-outline { background: transparent; color: #00D1FF; border: 1.5px solid rgba(0,209,255,0.3); }
+    .btn-outline:hover { border-color: #00D1FF; background: rgba(0,209,255,0.06); }
+    .footer-note { font-size: 12px; color: #5A5A6E; margin-top: 32px; }
+    .footer-note a { color: #00D1FF; }
+    .loading { color: #8E8E93; font-size: 13px; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .loading-dot { animation: pulse 1.5s infinite; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <!-- Success icon -->
+    <div class="check-circle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+
+    <!-- Plan badge -->
+    <div id="plan-badge" class="badge badge-pro">
+      <span class="loading-dot">⏳</span> Verifying your order...
+    </div>
+
+    <h1>You're in!</h1>
+    <p id="plan-subtitle" class="subtitle loading">Fetching your plan details...</p>
+
+    <!-- Order info -->
+    <div class="info-box" id="order-info" style="display:none;">
+      <div class="info-row"><span class="info-label">Plan</span><span class="info-value" id="info-plan">—</span></div>
+      <div class="info-row"><span class="info-label">Tier</span><span class="info-value" id="info-tier">—</span></div>
+      <div class="info-row" id="expiry-row"><span class="info-label">Expires</span><span class="info-value green" id="info-expires">—</span></div>
+    </div>
+
+    <!-- API key reminder -->
+    <div class="api-key-hint">
+      <p>📧 <strong>Your API key is on its way.</strong> Check your email inbox (and spam folder). It's shown only once — store it in a password manager now.</p>
+    </div>
+
+    <!-- Quick start curl -->
+    <div class="code-box">
+      <code># Test your API key
+curl -H "X-API-Key: YOUR_KEY" \
+  https://api.0xradar.app/v1/wallet/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/portfolio</code>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="btn-row">
+      <a href="https://docs.0xradar.app" class="btn btn-primary" target="_blank" rel="noopener">
+        📚 Read the Docs
+      </a>
+      <a href="https://t.me/0xradarapp" class="btn btn-outline" target="_blank" rel="noopener">
+        💬 Connect Bot
+      </a>
+    </div>
+
+    <p class="footer-note">
+      Questions? <a href="mailto:support@0xradar.app">support@0xradar.app</a> &middot;
+      <a href="https://x.com/0xradarapp" target="_blank" rel="noopener">@0xradarapp</a>
+    </p>
+  </div>
+
+  <script>
+    // Parse order_id from URL
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get('order_id');
+
+    const planBadge = document.getElementById('plan-badge');
+    const planSubtitle = document.getElementById('plan-subtitle');
+    const orderInfo = document.getElementById('order-info');
+
+    if (!orderId) {
+      planBadge.innerHTML = '✅ <span style="color:#00C851;">Payment Confirmed</span>';
+      planBadge.className = 'badge badge-pro';
+      planSubtitle.textContent = 'Your API key has been sent to your email. Check your inbox (and spam folder).';
+      planSubtitle.className = 'subtitle';
+      orderInfo.style.display = 'none';
+    } else {
+      // Attempt to fetch order info — will work once /me/orders endpoint is available
+      planBadge.innerHTML = '✅ <span style="color:#00C851;">Payment Confirmed</span>';
+      planBadge.className = orderId.includes('lifetime') ? 'badge badge-lifetime' : 'badge badge-pro';
+
+      // Fallback: parse plan from order_id prefix
+      let planLabel = 'Pro';
+      let planTier = 'Pro';
+      let expiresText = 'Check your email for details';
+
+      if (orderId.includes('lifetime')) {
+        planLabel = 'Lifetime Access';
+        planTier = 'Lifetime Pro';
+        expiresText = 'Never — lifetime access';
+        planBadge.className = 'badge badge-lifetime';
+      } else if (orderId.includes('yearly')) {
+        planLabel = 'Pro Yearly';
+        planTier = 'Pro';
+        const d = new Date();
+        d.setFullYear(d.getFullYear() + 1);
+        expiresText = d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      } else {
+        planLabel = 'Pro Monthly';
+        planTier = 'Pro';
+        const d = new Date();
+        d.setDate(d.getDate() + 30);
+        expiresText = d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      }
+
+      planSubtitle.textContent = 'Your API key has been sent to your email. Check your inbox (and spam folder).';
+      planSubtitle.className = 'subtitle';
+
+      document.getElementById('info-plan').textContent = planLabel;
+      document.getElementById('info-tier').textContent = planTier;
+      document.getElementById('info-expires').textContent = expiresText;
+      if (orderId.includes('lifetime')) {
+        document.getElementById('expiry-row').style.display = 'none';
+      }
+      orderInfo.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

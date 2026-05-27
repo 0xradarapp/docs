@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — 0xRadar</title>
+  <link rel="stylesheet" href="assets/dashboard.css">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+</head>
+<body>
+  <div class="login-page">
+    <!-- Background decoration -->
+    <div class="login-bg">
+      <div class="login-bg-glow"></div>
+    </div>
+
+    <!-- Login card -->
+    <div class="login-card">
+      <!-- Logo -->
+      <div class="login-logo">
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" width="40" height="40">
+          <rect width="40" height="40" rx="10" fill="#0A0E27"/>
+          <circle cx="20" cy="20" r="4" fill="#00D1FF"/>
+          <circle cx="20" cy="20" r="9" stroke="#00D1FF" stroke-width="1.5" opacity="0.6"/>
+          <circle cx="20" cy="20" r="14" stroke="#00D1FF" stroke-width="1" opacity="0.3"/>
+          <circle cx="20" cy="20" r="18" stroke="#00D1FF" stroke-width="0.75" opacity="0.15"/>
+        </svg>
+        <span class="login-logo-text">0xRadar</span>
+      </div>
+
+      <!-- Title -->
+      <h1 class="login-title">Sign in to your account</h1>
+      <p class="login-subtitle">Enter your email and API key to access the dashboard</p>
+
+      <!-- Form -->
+      <form id="login-form" class="login-form" novalidate>
+        <div class="form-group">
+          <label for="input-email" class="form-label">Email address</label>
+          <input
+            type="email"
+            id="input-email"
+            class="form-input"
+            placeholder="you@example.com"
+            autocomplete="email"
+            spellcheck="false"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="input-apikey" class="form-label">API Key</label>
+          <div class="input-with-btn">
+            <input
+              type="password"
+              id="input-apikey"
+              class="form-input"
+              placeholder="0xr_live_..."
+              autocomplete="off"
+              spellcheck="false"
+              required
+            >
+            <button type="button" id="btn-toggle-key" class="btn-icon" title="Show key">
+              <svg id="icon-eye" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" stroke="currentColor" stroke-width="1.2"/>
+                <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/>
+              </svg>
+            </button>
+          </div>
+          <p class="form-hint">
+            Get your API key at <a href="https://0xradar.app/dashboard" target="_blank">0xradar.app/dashboard</a>
+          </p>
+        </div>
+
+        <!-- Error message -->
+        <div id="login-error" class="login-error hidden" role="alert">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M8 5v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="8" cy="11.5" r="0.75" fill="currentColor"/>
+          </svg>
+          <span id="error-text"></span>
+        </div>
+
+        <button type="submit" id="btn-submit" class="btn btn-primary login-submit">
+          <span id="btn-text">Sign In</span>
+          <span id="btn-spinner" class="spinner hidden"></span>
+        </button>
+      </form>
+
+      <!-- Footer link -->
+      <p class="login-footer">
+        Don't have an account?
+        <a href="https://0xradar.app/pricing" target="_blank">Get your API key</a>
+      </p>
+    </div>
+
+    <!-- Language toggle -->
+    <div class="login-lang">
+      <button id="btn-lang-en" class="lang-btn active">EN</button>
+      <span class="lang-sep">|</span>
+      <button id="btn-lang-tr" class="lang-btn">TR</button>
+    </div>
+  </div>
+
+  <script src="assets/i18n.js"></script>
+  <script src="assets/auth.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      // Initialize i18n
+      initI18n();
+
+      // Elements
+      const form = document.getElementById('login-form');
+      const emailInput = document.getElementById('input-email');
+      const apiKeyInput = document.getElementById('input-apikey');
+      const btnSubmit = document.getElementById('btn-submit');
+      const btnText = document.getElementById('btn-text');
+      const btnSpinner = document.getElementById('btn-spinner');
+      const errorDiv = document.getElementById('login-error');
+      const errorText = document.getElementById('error-text');
+      const btnToggleKey = document.getElementById('btn-toggle-key');
+      const btnLangEn = document.getElementById('btn-lang-en');
+      const btnLangTr = document.getElementById('btn-lang-tr');
+
+      // Update texts based on locale
+      function updateTexts() {
+        document.title = I18n.t('login.title') + ' — 0xRadar';
+        document.querySelector('.login-title').textContent = I18n.t('login.title');
+        document.querySelector('.login-subtitle').textContent = I18n.t('login.subtitle');
+        document.querySelector('label[for="input-email"]').textContent = I18n.t('login.email');
+        emailInput.placeholder = I18n.t('login.emailPlaceholder');
+        document.querySelector('label[for="input-apikey"]').textContent = I18n.t('login.apiKey');
+        apiKeyInput.placeholder = I18n.t('login.apiKeyPlaceholder');
+        btnText.textContent = I18n.t('login.submit');
+        btnSubmit.querySelector('span:first-child').textContent = I18n.t('login.submit');
+        document.querySelector('.login-footer').innerHTML =
+          I18n.t('login.footer') + ' <a href="https://0xradar.app/pricing" target="_blank">' +
+          I18n.t('login.signupLink') + '</a>';
+
+        // Update lang buttons
+        btnLangEn.classList.toggle('active', I18n.getLocale() === 'en');
+        btnLangTr.classList.toggle('active', I18n.getLocale() === 'tr');
+      }
+
+      // Show/hide error
+      function showError(msg) {
+        errorText.textContent = msg;
+        errorDiv.classList.remove('hidden');
+      }
+
+      function hideError() {
+        errorDiv.classList.add('hidden');
+      }
+
+      // Set loading state
+      function setLoading(loading) {
+        btnSubmit.disabled = loading;
+        btnText.classList.toggle('hidden', loading);
+        btnSpinner.classList.toggle('hidden', !loading);
+        if (loading) hideError();
+      }
+
+      // Toggle API key visibility
+      btnToggleKey.addEventListener('click', () => {
+        const isPassword = apiKeyInput.type === 'password';
+        apiKeyInput.type = isPassword ? 'text' : 'password';
+        btnToggleKey.title = isPassword ? 'Hide key' : 'Show key';
+      });
+
+      // Language switching
+      function switchLang(locale) {
+        I18n.setLocale(locale);
+        updateTexts();
+      }
+
+      btnLangEn.addEventListener('click', () => switchLang('en'));
+      btnLangTr.addEventListener('click', () => switchLang('tr'));
+
+      // Form submission
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideError();
+
+        const email = emailInput.value.trim();
+        const apiKey = apiKeyInput.value.trim();
+
+        // Basic validation
+        if (!email || !email.includes('@')) {
+          showError(I18n.t('login.error.invalid'));
+          emailInput.focus();
+          return;
+        }
+        if (!apiKey || apiKey.length < 16) {
+          showError(I18n.t('login.error.invalid'));
+          apiKeyInput.focus();
+          return;
+        }
+
+        setLoading(true);
+
+        try {
+          const result = await Auth.loginWithEmailKey(email, apiKey);
+
+          if (result.success) {
+            // Redirect to return URL or dashboard
+            const params = new URLSearchParams(window.location.search);
+            const returnTo = params.get('return') || 'dashboard.html';
+            window.location.href = returnTo;
+          } else {
+            showError(result.error || I18n.t('login.error.invalid'));
+            setLoading(false);
+          }
+        } catch (err) {
+          if (err.message === 'API_NOT_CONNECTED') {
+            // Demo mode — use mock login
+            Auth.enableMockMode();
+            const result = await Auth.loginWithEmailKey(email, apiKey);
+            if (result.success) {
+              const params = new URLSearchParams(window.location.search);
+              const returnTo = params.get('return') || 'dashboard.html';
+              window.location.href = returnTo;
+              return;
+            }
+          }
+          showError(I18n.t('login.error.connection'));
+          setLoading(false);
+        }
+      });
+
+      // Pre-fill email from URL or localStorage
+      const params = new URLSearchParams(window.location.search);
+      const prefilledEmail = params.get('email') || Auth.getStoredEmail();
+      if (prefilledEmail) {
+        emailInput.value = prefilledEmail;
+      }
+
+      // Check if already logged in
+      if (Auth.isSessionValid()) {
+        const params2 = new URLSearchParams(window.location.search);
+        const returnTo = params2.get('return') || 'dashboard.html';
+        window.location.href = returnTo;
+        return;
+      }
+
+      updateTexts();
+    })();
+  </script>
+
+  <style>
+    /* Login page specific styles */
+    body {
+      background: var(--bg-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-page {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      padding: 20px;
+    }
+
+    .login-bg {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .login-bg-glow {
+      position: absolute;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(0, 209, 255, 0.08) 0%, transparent 70%);
+    }
+
+    .login-card {
+      position: relative;
+      z-index: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 36px 32px;
+      box-shadow: var(--shadow-elevated);
+    }
+
+    .login-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .login-logo-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .login-title {
+      font-size: 1.375rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .login-subtitle {
+      font-size: 0.9375rem;
+      color: var(--text-secondary);
+      margin-bottom: 28px;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .login-error {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--danger-dim);
+      border: 1px solid rgba(255, 82, 82, 0.2);
+      border-radius: var(--radius-md);
+      color: var(--danger);
+      font-size: 0.875rem;
+      margin-bottom: 8px;
+    }
+
+    .login-submit {
+      width: 100%;
+      padding: 12px;
+      font-size: 0.9375rem;
+      margin-top: 8px;
+    }
+
+    .login-footer {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    .login-footer a {
+      color: var(--accent);
+    }
+
+    .input-with-btn {
+      position: relative;
+    }
+
+    .input-with-btn .form-input {
+      padding-right: 44px;
+    }
+
+    .input-with-btn .btn-icon {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+    }
+
+    .login-lang {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 24px;
+      font-size: 0.8125rem;
+    }
+
+    .lang-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      transition: color var(--transition-fast);
+    }
+
+    .lang-btn:hover { color: var(--text-primary); }
+
+    .lang-btn.active {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .lang-sep {
+      color: var(--text-muted);
+    }
+
+    /* Light mode overrides for login */
+    body.light-mode .login-bg-glow {
+      background: radial-gradient(circle, rgba(0, 153, 204, 0.06) 0%, transparent 70%);
+    }
+  </style>
+</body>
+</html>

@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — 0xRadar</title>
+  <link rel="stylesheet" href="assets/dashboard.css">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-shell" id="app-shell">
+
+    <!-- Sidebar backdrop (mobile) -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="dashboard.html" class="sidebar-logo">
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
+            <rect width="40" height="40" rx="8" fill="#0A0E27"/>
+            <circle cx="20" cy="20" r="4" fill="#00D1FF"/>
+            <circle cx="20" cy="20" r="9" stroke="#00D1FF" stroke-width="1.5" opacity="0.6"/>
+            <circle cx="20" cy="20" r="14" stroke="#00D1FF" stroke-width="1" opacity="0.3"/>
+          </svg>
+          <span class="sidebar-logo-text">0xRadar</span>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="nav-section-label">Main</span>
+        <a href="dashboard.html" class="nav-item active" data-page="dashboard">
+          <svg viewBox="0 0 20 20" fill="none">
+            <rect x="2" y="2" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="11" y="2" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="2" y="11" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="11" y="11" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          Dashboard
+        </a>
+        <a href="dashboard.html#keys" class="nav-item" data-page="keys">
+          <svg viewBox="0 0 20 20" fill="none">
+            <path d="M15.5 7.5h-2a4 4 0 010 8h2m0-4v4m0-4v-1a3 3 0 016 0v1m-6-2h1.5a2.5 2.5 0 010 5H15m0-5H17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          API Keys
+        </a>
+        <a href="dashboard.html#subscription" class="nav-item" data-page="subscription">
+          <svg viewBox="0 0 20 20" fill="none">
+            <rect x="2" y="5" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M2 8l4 3 3-2 3 2 4-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Subscription
+        </a>
+        <a href="settings.html" class="nav-item" data-page="settings">
+          <svg viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M10 2v2m0 12v2M2 10h2m12 0h2M4.22 4.22l1.42 1.42m8.72 8.72 1.42 1.42M4.22 15.78l1.42-1.42M13.36 13.36l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Settings
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="https://api.0xradar.app/docs" target="_blank" class="nav-item">
+          <svg viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M8 7.5a2 2 0 114 0 2 2 0 01-4 0z" fill="currentColor"/>
+            <path d="M10 13.5c0-1.5 2-2 2-3.5a2 2 0 00-4 0" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          API Docs
+        </a>
+        <button class="nav-item" id="btn-logout">
+          <svg viewBox="0 0 20 20" fill="none">
+            <path d="M13 3h3a2 2 0 012 2v9a2 2 0 01-2 2h-3M7 10l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M11 7H7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+      <!-- Top header -->
+      <header class="top-header">
+        <div class="header-left">
+          <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle menu">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <h1 class="page-title" id="page-title">Dashboard</h1>
+        </div>
+        <div class="header-right">
+          <button class="theme-toggle" id="btn-theme" title="Toggle theme">
+            <svg id="icon-sun" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M8 1.5v1m0 11v1M1.5 8h1m11 0h1M3.05 3.05l.7.7m8.5 8.5.7.7M3.05 12.95l.7-.7m8.5-8.5.7-.7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+          </button>
+
+          <div class="user-menu">
+            <button class="user-menu-btn" id="user-menu-btn">
+              <div class="user-avatar" id="user-avatar">U</div>
+              <span class="user-email" id="user-email">user@example.com</span>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <div class="user-dropdown" id="user-dropdown">
+              <a href="settings.html" class="dropdown-item">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1.3"/>
+                  <path d="M7 1.5v1.5m0 9v1.5M1.5 7h1.5m9 0h1.5M3 3l.7.7m6.6 6.6.7.7M3 11l.7-.7m6.6-6.6.7-.7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                </svg>
+                Settings
+              </a>
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-item danger" id="dropdown-logout">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M10 3.5h2.5a1 1 0 011 1v5a1 1 0 01-1 1H10M6 10l3-3-3-3M9 7H4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Page content -->
+      <div class="page-container" id="page-content">
+
+        <!-- Section 1: Stats overview -->
+        <section class="stats-grid" id="section-stats">
+          <!-- Filled by JS -->
+        </section>
+
+        <!-- Section 2: API Keys + Usage side by side -->
+        <div class="dashboard-grid">
+          <!-- API Keys card -->
+          <div class="card" id="card-keys">
+            <div class="card-header">
+              <h2 class="card-title">API Keys</h2>
+              <button class="card-action" id="btn-generate-key">+ Generate New</button>
+            </div>
+            <div id="keys-content">
+              <!-- Filled by JS -->
+            </div>
+          </div>
+
+          <!-- Rate Limit card -->
+          <div class="card" id="card-rate-limit">
+            <div class="card-header">
+              <h2 class="card-title">Rate Limit</h2>
+            </div>
+            <div id="rate-limit-content">
+              <!-- Filled by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Usage chart -->
+        <div class="card" style="margin-top: 20px;">
+          <div class="card-header">
+            <h2 class="card-title">Usage — Last 7 Days</h2>
+          </div>
+          <div class="chart-container">
+            <canvas id="usage-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Section 4: Subscription -->
+        <div class="card" style="margin-top: 20px;" id="card-subscription">
+          <div class="card-header">
+            <h2 class="card-title">Subscription</h2>
+          </div>
+          <div id="sub-content">
+            <!-- Filled by JS -->
+          </div>
+        </div>
+
+        <!-- Section 5: API Playground -->
+        <div class="card" style="margin-top: 20px;" id="card-playground">
+          <div class="card-header">
+            <h2 class="card-title">Quick Test</h2>
+            <span class="text-sm text-muted">Test any wallet address against the API</span>
+          </div>
+          <div class="playground-box">
+            <div class="playground-input-row">
+              <input
+                type="text"
+                id="playground-address"
+                class="playground-input"
+                placeholder="0x742d35Cc6634C0532925a3b844Bc9e7595f1b87"
+                spellcheck="false"
+              >
+              <button class="playground-btn" id="btn-test">Test</button>
+            </div>
+            <div id="playground-response" class="playground-response">Enter a wallet address and click Test to see the API response.</div>
+          </div>
+
+          <!-- Code snippets -->
+          <div style="margin-top: 16px;">
+            <div class="tabs" id="snippet-tabs">
+              <button class="tab-btn active" data-tab="curl">cURL</button>
+              <button class="tab-btn" data-tab="python">Python</button>
+              <button class="tab-btn" data-tab="js">JavaScript</button>
+            </div>
+            <div id="snippet-content">
+              <!-- Filled by JS -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Generate key modal -->
+  <div class="modal-backdrop" id="modal-generate-key">
+    <div class="modal">
+      <h2 class="modal-title">Generate New API Key</h2>
+      <p class="modal-desc">Give this key a name to identify it later.</p>
+      <div class="form-group">
+        <label for="input-key-name" class="form-label">Key Name</label>
+        <input type="text" id="input-key-name" class="form-input" placeholder="e.g. Production, Development">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="btn-cancel-key">Cancel</button>
+        <button class="btn btn-primary" id="btn-confirm-generate">Generate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reveal key modal -->
+  <div class="modal-backdrop" id="modal-reveal-key">
+    <div class="modal">
+      <h2 class="modal-title">Your API Key</h2>
+      <p class="modal-desc" style="color: var(--warning);">This key is shown only once. Copy it now.</p>
+      <div class="api-key-display" id="revealed-key-display" style="margin-bottom: 20px;">
+        <span id="revealed-key-text" class="font-mono" style="word-break: break-all; font-size: 0.8125rem; color: var(--accent);"></span>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="btn-close-reveal">Close</button>
+        <button class="btn btn-primary" id="btn-copy-revealed">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <rect x="4" y="4" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M2 10V3a1 1 0 011-1h7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+          Copy Key
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Revoke key modal -->
+  <div class="modal-backdrop" id="modal-revoke-key">
+    <div class="modal">
+      <h2 class="modal-title">Revoke API Key?</h2>
+      <p class="modal-desc">This action cannot be undone. Any application using this key will stop working.</p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="btn-cancel-revoke">Cancel</button>
+        <button class="btn btn-danger" id="btn-confirm-revoke">Revoke Key</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/i18n.js"></script>
+  <script src="assets/auth.js"></script>
+  <script src="assets/api.js"></script>
+  <script src="assets/chart-loader.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      initI18n();
+
+      // ─── State ─────────────────────────────────────────────────────
+      let currentUser = null;
+      let apiKeys = [];
+      let usageData = null;
+      let rateLimit = null;
+      let subscription = null;
+      let usageChart = null;
+      let pendingKeyId = null;
+      let pendingKeyPlain = null;
+
+      // ─── Auth Guard ───────────────────────────────────────────────
+      if (!Auth.isSessionValid()) {
+        window.location.href = 'login.html?return=' + encodeURIComponent(window.location.href);
+        return;
+      }
+
+      currentUser = Auth.getCurrentUser();
+
+      // ─── DOM refs ────────────────────────────────────────────────
+      const $sidebar = document.getElementById('sidebar');
+      const $sidebarBackdrop = document.getElementById('sidebar-backdrop');
+      const $sidebarToggle = document.getElementById('sidebar-toggle');
+      const $userDropdown = document.getElementById('user-dropdown');
+      const $userMenuBtn = document.getElementById('user-menu-btn');
+      const $userEmail = document.getElementById('user-email');
+      const $userAvatar = document.getElementById('user-avatar');
+      const $toastContainer = document.getElementById('toast-container');
+
+      // ─── Theme ────────────────────────────────────────────────────
+      function applyTheme(isDark) {
+        if (isDark) {
+          document.body.classList.remove('light-mode');
+        } else {
+          document.body.classList.add('light-mode');
+        }
+        localStorage.setItem('0xr_theme', isDark ? 'dark' : 'light');
+      }
+
+      function initTheme() {
+        const stored = localStorage.getItem('0xr_theme');
+        if (stored === 'light') {
+          applyTheme(false);
+        } else if (stored === 'dark') {
+          applyTheme(true);
+        } else {
+          applyTheme(true); // default dark
+        }
+      }
+
+      document.getElementById('btn-theme').addEventListener('click', () => {
+        const isDark = !document.body.classList.contains('light-mode');
+        applyTheme(isDark);
+      });
+
+      // ─── Sidebar (mobile) ─────────────────────────────────────────
+      $sidebarToggle.addEventListener('click', () => {
+        $sidebar.classList.toggle('open');
+        $sidebarBackdrop.classList.toggle('open');
+      });
+
+      $sidebarBackdrop.addEventListener('click', () => {
+        $sidebar.classList.remove('open');
+        $sidebarBackdrop.classList.remove('open');
+      });
+
+      // ─── User menu ────────────────────────────────────────────────
+      $userMenuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        $userDropdown.classList.toggle('open');
+      });
+
+      document.addEventListener('click', () => {
+        $userDropdown.classList.remove('open');
+      });
+
+      // ─── Logout ───────────────────────────────────────────────────
+      function bindLogout(btn) {
+        btn.addEventListener('click', async () => {
+          await Auth.logout();
+        });
+      }
+
+      bindLogout(document.getElementById('btn-logout'));
+      bindLogout(document.getElementById('dropdown-logout'));
+
+      // ─── Toast ────────────────────────────────────────────────────
+      function showToast(title, message, type = 'info') {
+        const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+          <span class="toast-icon">${icons[type] || icons.info}</span>
+          <div class="toast-content">
+            <div class="toast-title">${title}</div>
+            ${message ? `<div class="toast-message">${message}</div>` : ''}
+          </div>
+          <button class="toast-close">×</button>
+        `;
+        $toastContainer.appendChild(toast);
+
+        toast.querySelector('.toast-close').addEventListener('click', () => toast.remove());
+        setTimeout(() => toast.remove(), 4000);
+      }
+
+      // ─── Update user display ──────────────────────────────────────
+      function updateUserDisplay() {
+        const email = currentUser?.email || 'user@example.com';
+        const initial = email.charAt(0).toUpperCase();
+        $userEmail.textContent = email;
+        $userAvatar.textContent = initial;
+        document.title = I18n.t('dash.welcome') + ' — 0xRadar';
+      }
+
+      // ─── Load all data ────────────────────────────────────────────
+      async function loadAll() {
+        const token = Auth.getAuthToken();
+
+        try {
+          const [keysData, usage, rl, sub] = await Promise.all([
+            Api.getApiKeys(token),
+            Api.getUsageStats(token, 7),
+            Api.getRateLimitStatus(token),
+            Api.getSubscription(token)
+          ]);
+
+          apiKeys = keysData.keys || [];
+          usageData = usage;
+          rateLimit = rl;
+          subscription = sub;
+
+          render();
+        } catch (err) {
+          if (err.message === 'API_NOT_CONNECTED') {
+            // Demo mode — data already populated via mock
+            render();
+          } else {
+            showToast(I18n.t('toast.error'), err.message, 'error');
+          }
+        }
+      }
+
+      // ─── Render ──────────────────────────────────────────────────
+      function render() {
+        updateUserDisplay();
+        renderStats();
+        renderApiKeys();
+        renderRateLimit();
+        renderSubscription();
+        renderChart();
+        updateSnippet('curl', '');
+      }
+
+      // ─── Stats overview ───────────────────────────────────────────
+      function renderStats() {
+        const totalRequests = usageData?.data?.reduce((s, d) => s + d.requests, 0) || 0;
+        const uniqueWallets = usageData?.data?.reduce((s, d) => s + d.wallets, 0) || 0;
+        const daysWithData = usageData?.data?.filter(d => d.requests > 0).length || 0;
+
+        const tier = subscription?.tier || 'free';
+        const expiresAt = subscription?.current_period_end || null;
+        const countdown = expiresAt ? I18n.getCountdown(expiresAt) : null;
+
+        document.getElementById('section-stats').innerHTML = `
+          <div class="stats-card">
+            <span class="stats-label">Total Requests</span>
+            <span class="stats-value accent">${I18n.formatNumber(totalRequests)}</span>
+            <span class="stats-meta">${I18n.t('usage.last7Days')}</span>
+          </div>
+          <div class="stats-card">
+            <span class="stats-label">Unique Wallets</span>
+            <span class="stats-value">${I18n.formatNumber(uniqueWallets)}</span>
+            <span class="stats-meta">${I18n.formatNumber(daysWithData)} days active</span>
+          </div>
+          <div class="stats-card">
+            <span class="stats-label">${I18n.t('dash.plan.pro').split(' ')[0]}</span>
+            <span class="stats-value">${getPlanBadge(tier)}</span>
+            ${countdown ? `<span class="stats-meta">${I18n.t('dash.plan.expires')}: ${countdown}</span>` : ''}
+          </div>
+          <div class="stats-card">
+            <span class="stats-label">API Keys</span>
+            <span class="stats-value">${apiKeys.length}</span>
+            <span class="stats-meta">active</span>
+          </div>
+        `;
+      }
+
+      function getPlanBadge(tier) {
+        if (tier === 'lifetime') return `<span class="badge badge-lifetime">${I18n.t('dash.plan.lifetime')}</span>`;
+        if (tier === 'pro') return `<span class="badge badge-pro">${I18n.t('dash.plan.pro')}</span>`;
+        return `<span class="badge badge-free">${I18n.t('dash.plan.free')}</span>`;
+      }
+
+      // ─── API Keys ─────────────────────────────────────────────────
+      function renderApiKeys() {
+        const container = document.getElementById('keys-content');
+
+        if (apiKeys.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">🔑</div>
+              <div class="empty-title">${I18n.t('keys.empty.title')}</div>
+              <div class="empty-desc">${I18n.t('keys.empty.desc')}</div>
+            </div>
+          `;
+          return;
+        }
+
+        const rows = apiKeys.map(key => `
+          <tr data-key-id="${key.id}">
+            <td>
+              <div style="font-weight: 500;">${key.name || 'Unnamed'}</div>
+            </td>
+            <td>
+              <div class="api-key-display" style="padding: 6px 10px;">
+                <span class="api-key-prefix">${key.prefix}${'•'.repeat(20)}</span>
+              </div>
+            </td>
+            <td><span class="badge badge-${key.tier === 'pro' ? 'pro' : key.tier === 'dev' ? 'pro' : 'free'}">${I18n.t('key.tier.' + key.tier) || key.tier}</span></td>
+            <td><span class="text-sm text-muted">${I18n.formatRelativeTime(key.last_used_at)}</span></td>
+            <td><span class="text-sm text-muted">${I18n.formatDate(key.created_at)}</span></td>
+            <td>
+              <div style="display: flex; gap: 6px; justify-content: flex-end;">
+                <button class="btn-icon btn-reveal" data-id="${key.id}" title="${I18n.t('common.reveal')}">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M1 7s2-4 6-4 6 4 6 4-2 4-6 4-6-4-6-4z" stroke="currentColor" stroke-width="1.3"/>
+                    <circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1.3"/>
+                  </svg>
+                </button>
+                <button class="btn-icon btn-copy-key" data-key="${key.prefix}${'•'.repeat(20)}" title="${I18n.t('common.copy')}">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <rect x="4" y="4" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.3"/>
+                    <path d="M2 10V3a1 1 0 011-1h7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                  </svg>
+                </button>
+                <button class="btn-icon btn-revoke" data-id="${key.id}" title="${I18n.t('common.revoke')}" style="color: var(--danger);">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M10.5 3.5l-7 7M3.5 3.5l7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+
+        container.innerHTML = `
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>${I18n.t('keys.table.name')}</th>
+                <th>${I18n.t('keys.table.prefix')}</th>
+                <th>${I18n.t('keys.table.tier')}</th>
+                <th>${I18n.t('keys.table.lastUsed')}</th>
+                <th>${I18n.t('keys.table.created')}</th>
+                <th>${I18n.t('keys.table.actions')}</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        `;
+
+        // Bind events
+        container.querySelectorAll('.btn-reveal').forEach(btn => {
+          btn.addEventListener('click', () => handleRevealKey(btn.dataset.id));
+        });
+        container.querySelectorAll('.btn-copy-key').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const keyText = btn.dataset.key;
+            copyToClipboard(keyText);
+            showToast(I18n.t('toast.copied'), '', 'success');
+          });
+        });
+        container.querySelectorAll('.btn-revoke').forEach(btn => {
+          btn.addEventListener('click', () => handleRevokeKey(btn.dataset.id));
+        });
+      }
+
+      // ─── Rate Limit ───────────────────────────────────────────────
+      function renderRateLimit() {
+        const container = document.getElementById('rate-limit-content');
+        if (!rateLimit) {
+          container.innerHTML = '<p class="text-muted">Loading...</p>';
+          return;
+        }
+
+        const minuteUsed = rateLimit.minute?.used || 0;
+        const minuteLimit = rateLimit.minute?.limit || 60;
+        const dayUsed = rateLimit.day?.used || 0;
+        const dayLimit = rateLimit.day?.limit || 100000;
+
+        const minutePct = Math.min(100, (minuteUsed / minuteLimit) * 100);
+        const dayPct = Math.min(100, (dayUsed / dayLimit) * 100);
+
+        const minuteClass = minutePct > 80 ? 'danger' : minutePct > 60 ? 'warning' : '';
+        const dayClass = dayPct > 80 ? 'danger' : dayPct > 60 ? 'warning' : '';
+
+        container.innerHTML = `
+          <div class="rate-limit-bar">
+            <div class="rate-limit-header">
+              <span class="rate-limit-label">${I18n.t('rateLimit.minute')}</span>
+              <span class="rate-limit-value">${I18n.formatNumber(minuteUsed)} / ${I18n.formatNumber(minuteLimit)}</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill ${minuteClass}" style="width: ${minutePct}%"></div>
+            </div>
+          </div>
+          <div class="rate-limit-bar" style="margin-top: 12px;">
+            <div class="rate-limit-header">
+              <span class="rate-limit-label">${I18n.t('rateLimit.day')}</span>
+              <span class="rate-limit-value">${I18n.formatNumber(dayUsed)} / ${I18n.formatNumber(dayLimit)}</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill ${dayClass}" style="width: ${dayPct}%"></div>
+            </div>
+          </div>
+        `;
+      }
+
+      // ─── Subscription ─────────────────────────────────────────────
+      function renderSubscription() {
+        const container = document.getElementById('sub-content');
+        if (!subscription) {
+          container.innerHTML = '<p class="text-muted">Loading...</p>';
+          return;
+        }
+
+        const plan = subscription.plan || 'free';
+        const status = subscription.status || 'active';
+        const endDate = subscription.current_period_end ? I18n.formatDate(subscription.current_period_end) : '—';
+        const price = subscription.price_usd ? I18n.formatCurrency(subscription.price_usd) : null;
+        const isLifetime = plan === 'pro_lifetime' || plan === 'lifetime';
+
+        container.innerHTML = `
+          <div class="stats-grid" style="margin-bottom: 20px;">
+            <div class="stats-card">
+              <span class="stats-label">${I18n.t('sub.currentPlan')}</span>
+              <span class="stats-value">${getPlanDisplay(plan)}</span>
+              ${price ? `<span class="stats-meta">${price}/mo</span>` : ''}
+            </div>
+            <div class="stats-card">
+              <span class="stats-label">${I18n.t('sub.status')}</span>
+              <span class="stats-value"><span class="badge badge-${status === 'active' ? 'pro' : 'warning'}">${I18n.t('sub.status.' + status) || status}</span></span>
+            </div>
+            <div class="stats-card">
+              <span class="stats-label">${isLifetime ? I18n.t('sub.expires') : I18n.t('sub.renews')}</span>
+              <span class="stats-value" style="font-size: 1.25rem;">${isLifetime ? 'Never' : endDate}</span>
+              ${!isLifetime && subscription.current_period_end ? `<span class="stats-meta">${I18n.getCountdown(subscription.current_period_end)}</span>` : ''}
+            </div>
+          </div>
+
+          ${!isLifetime ? `
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn btn-secondary" id="btn-renew">${I18n.t('sub.renewNow')}</button>
+            <button class="btn btn-secondary" id="btn-upgrade-lifetime">${I18n.t('sub.upgradeLifetime')}</button>
+          </div>
+          ` : `
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+            <span class="badge badge-lifetime">✓ Lifetime</span>
+            <span class="text-sm text-muted">No renewal needed</span>
+          </div>
+          `}
+
+          <h3 style="font-size: 0.875rem; font-weight: 600; margin: 20px 0 12px;">${I18n.t('sub.paymentHistory')}</h3>
+          ${renderPaymentHistory()}
+        `;
+
+        // Bind renewal buttons
+        const btnRenew = document.getElementById('btn-renew');
+        if (btnRenew) {
+          btnRenew.addEventListener('click', async () => {
+            const token = Auth.getAuthToken();
+            try {
+              const result = await Api.createCheckout(token, 'pro_monthly');
+              window.open(result.checkout_url, '_blank');
+            } catch (err) {
+              showToast(I18n.t('toast.error'), err.message, 'error');
+            }
+          });
+        }
+
+        const btnUpgrade = document.getElementById('btn-upgrade-lifetime');
+        if (btnUpgrade) {
+          btnUpgrade.addEventListener('click', async () => {
+            const token = Auth.getAuthToken();
+            try {
+              const result = await Api.createCheckout(token, 'pro_lifetime');
+              window.open(result.checkout_url, '_blank');
+            } catch (err) {
+              showToast(I18n.t('toast.error'), err.message, 'error');
+            }
+          });
+        }
+      }
+
+      function getPlanDisplay(plan) {
+        if (plan === 'lifetime' || plan === 'pro_lifetime') return 'Lifetime';
+        if (plan === 'pro_monthly') return 'Pro';
+        if (plan === 'pro_yearly') return 'Pro Yearly';
+        return 'Free';
+      }
+
+      function renderPaymentHistory() {
+        // Uses mock data from api.js — shows last 3 orders
+        const orders = [
+          { id: 'order_abc123', amount_usd: 9.99, status: 'completed', created_at: '2026-05-01T10:23:00Z' },
+          { id: 'order_def456', amount_usd: 9.99, status: 'completed', created_at: '2026-04-01T09:15:00Z' },
+          { id: 'order_ghi789', amount_usd: 9.99, status: 'completed', created_at: '2026-03-01T14:44:00Z' }
+        ];
+
+        if (orders.length === 0) {
+          return `<p class="text-muted text-sm">${I18n.t('sub.noHistory')}</p>`;
+        }
+
+        const rows = orders.map(o => `
+          <tr>
+            <td class="font-mono text-sm">${o.id}</td>
+            <td>${I18n.formatDate(o.created_at)}</td>
+            <td>${I18n.formatCurrency(o.amount_usd)}</td>
+            <td><span class="badge badge-pro">${I18n.t('sub.status.' + o.status)}</span></td>
+            <td><a href="#" class="text-accent text-sm" onclick="return false;">${I18n.t('sub.order.invoice')}</a></td>
+          </tr>
+        `).join('');
+
+        return `
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>${I18n.t('sub.order.id')}</th>
+                <th>${I18n.t('sub.order.date')}</th>
+                <th>${I18n.t('sub.order.amount')}</th>
+                <th>${I18n.t('sub.order.status')}</th>
+                <th>${I18n.t('sub.order.invoice')}</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        `;
+      }
+
+      // ─── Chart ────────────────────────────────────────────────────
+      function renderChart() {
+        const canvas = document.getElementById('usage-chart');
+        if (!canvas) return;
+
+        const labels = usageData?.data?.map(d => {
+          const date = new Date(d.date);
+          return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }) || [];
+
+        const values = usageData?.data?.map(d => d.requests) || [];
+
+        const isDark = !document.body.classList.contains('light-mode');
+        const textColor = isDark ? '#8B93B0' : '#5A6380';
+        const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+
+        if (usageChart) {
+          usageChart.destroy();
+        }
+
+        usageChart = new Chart(canvas, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [{
+              label: 'Requests',
+              data: values,
+              borderColor: '#00D1FF',
+              backgroundColor: 'rgba(0, 209, 255, 0.1)',
+              borderWidth: 2,
+              fill: true,
+              tension: 0.4,
+              pointRadius: 3,
+              pointBackgroundColor: '#00D1FF'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: isDark ? '#161B3A' : '#FFFFFF',
+                titleColor: isDark ? '#FFFFFF' : '#0A0E27',
+                bodyColor: textColor,
+                borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                borderWidth: 1,
+                padding: 10,
+                callbacks: {
+                  label: (ctx) => `${ctx.parsed.y.toLocaleString()} requests`
+                }
+              }
+            },
+            scales: {
+              x: {
+                grid: { color: gridColor },
+                ticks: { color: textColor, font: { size: 11 } }
+              },
+              y: {
+                beginAtZero: true,
+                grid: { color: gridColor },
+                ticks: {
+                  color: textColor,
+                  font: { size: 11 },
+                  callback: (v) => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v
+                }
+              }
+            }
+          }
+        });
+      }
+
+      // ─── Key generation modal ─────────────────────────────────────
+      document.getElementById('btn-generate-key').addEventListener('click', () => {
+        document.getElementById('input-key-name').value = '';
+        document.getElementById('modal-generate-key').classList.add('open');
+      });
+
+      document.getElementById('btn-cancel-key').addEventListener('click', () => {
+        document.getElementById('modal-generate-key').classList.remove('open');
+      });
+
+      document.getElementById('btn-confirm-generate').addEventListener('click', async () => {
+        const name = document.getElementById('input-key-name').value.trim() || 'New Key';
+        const token = Auth.getAuthToken();
+        document.getElementById('btn-confirm-generate').disabled = true;
+
+        try {
+          const result = await Api.createApiKey(token, name);
+          pendingKeyPlain = result.key;
+          pendingKeyId = result.id;
+
+          document.getElementById('modal-generate-key').classList.remove('open');
+          document.getElementById('modal-reveal-key').classList.add('open');
+          document.getElementById('revealed-key-text').textContent = result.key;
+          document.getElementById('btn-confirm-generate').disabled = false;
+
+          // Refresh keys list
+          const keysData = await Api.getApiKeys(token);
+          apiKeys = keysData.keys || [];
+          renderApiKeys();
+
+          showToast(I18n.t('toast.keyGenerated'), '', 'success');
+        } catch (err) {
+          showToast(I18n.t('toast.error'), err.message, 'error');
+          document.getElementById('btn-confirm-generate').disabled = false;
+        }
+      });
+
+      document.getElementById('btn-close-reveal').addEventListener('click', () => {
+        document.getElementById('modal-reveal-key').classList.remove('open');
+        pendingKeyPlain = null;
+      });
+
+      document.getElementById('btn-copy-revealed').addEventListener('click', () => {
+        if (pendingKeyPlain) {
+          copyToClipboard(pendingKeyPlain);
+          showToast(I18n.t('toast.copied'), '', 'success');
+        }
+      });
+
+      // ─── Key reveal ───────────────────────────────────────────────
+      async function handleRevealKey(keyId) {
+        const token = Auth.getAuthToken();
+        try {
+          const result = await Api.revealApiKey(token, keyId);
+          pendingKeyPlain = result.key;
+          pendingKeyId = keyId;
+
+          document.getElementById('modal-reveal-key').classList.add('open');
+          document.getElementById('revealed-key-text').textContent = result.key;
+        } catch (err) {
+          showToast(I18n.t('toast.error'), err.message, 'error');
+        }
+      }
+
+      // ─── Key revoke ───────────────────────────────────────────────
+      let revokeTargetId = null;
+
+      function handleRevokeKey(keyId) {
+        revokeTargetId = keyId;
+        document.getElementById('modal-revoke-key').classList.add('open');
+      }
+
+      document.getElementById('btn-cancel-revoke').addEventListener('click', () => {
+        document.getElementById('modal-revoke-key').classList.remove('open');
+        revokeTargetId = null;
+      });
+
+      document.getElementById('btn-confirm-revoke').addEventListener('click', async () => {
+        if (!revokeTargetId) return;
+        const token = Auth.getAuthToken();
+
+        try {
+          await Api.revokeApiKey(token, revokeTargetId);
+          document.getElementById('modal-revoke-key').classList.remove('open');
+
+          // Refresh keys
+          const keysData = await Api.getApiKeys(token);
+          apiKeys = keysData.keys || [];
+          renderApiKeys();
+
+          showToast(I18n.t('toast.keyRevoked'), '', 'success');
+          revokeTargetId = null;
+        } catch (err) {
+          showToast(I18n.t('toast.error'), err.message, 'error');
+        }
+      });
+
+      // ─── Playground ───────────────────────────────────────────────
+      function updateSnippet(type, address) {
+        const addr = address || '0x742d35Cc6634C0532925a3b844Bc9e7595f1b87';
+        const token = Auth.getAuthToken();
+        const keyDisplay = token ? `${token.substring(0, 12)}...` : 'YOUR_API_KEY';
+
+        let snippet = '';
+        if (type === 'curl') {
+          snippet = `curl https://api.0xradar.app/v1/wallet/${addr}/portfolio \\
+  -H "X-API-Key: ${keyDisplay}"`;
+        } else if (type === 'python') {
+          snippet = `import httpx
+
+address = "${addr}"
+headers = {"X-API-Key": "${keyDisplay}"}
+resp = httpx.get(
+    f"https://api.0xradar.app/v1/wallet/{address}/portfolio",
+    headers=headers
+)
+data = resp.json()
+print(f"Total: ${'$'}{float(data['total_value_usd']):,.2f}")`;
+        } else if (type === 'js') {
+          snippet = `const address = "${addr}";
+const response = await fetch(
+  \`https://api.0xradar.app/v1/wallet/\${address}/portfolio\`,
+  { headers: { "X-API-Key": "${keyDisplay}" } }
+);
+const data = await response.json();
+console.log(\`Total: $\${data.total_value_usd}\`);`;
+        }
+
+        document.getElementById('snippet-content').innerHTML = `
+          <div class="code-snippet"><code>${snippet.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>').replace(/ /g, '&nbsp;')}</code></div>
+        `;
+      }
+
+      // Tab switching
+      document.querySelectorAll('#snippet-tabs .tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('#snippet-tabs .tab-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const addr = document.getElementById('playground-address').value.trim();
+          updateSnippet(btn.dataset.tab, addr);
+        });
+      });
+
+      // Address input → update snippets
+      document.getElementById('playground-address').addEventListener('input', (e) => {
+        const activeTab = document.querySelector('#snippet-tabs .tab-btn.active');
+        updateSnippet(activeTab?.dataset?.tab || 'curl', e.target.value.trim());
+      });
+
+      // Test button
+      document.getElementById('btn-test').addEventListener('click', async () => {
+        const address = document.getElementById('playground-address').value.trim();
+        const responseEl = document.getElementById('playground-response');
+
+        if (!address || !/^0x[a-fA-F0-9]{40}$/.test(address)) {
+          responseEl.textContent = 'Invalid EVM address format';
+          responseEl.style.color = 'var(--danger)';
+          return;
+        }
+
+        const btn = document.getElementById('btn-test');
+        btn.disabled = true;
+        btn.textContent = I18n.t('playground.testing');
+        responseEl.textContent = 'Loading...';
+        responseEl.style.color = 'var(--text-secondary)';
+
+        const token = Auth.getAuthToken();
+
+        try {
+          const data = await Api.testPortfolioEndpoint(address, token);
+          responseEl.textContent = JSON.stringify(data, null, 2);
+          responseEl.style.color = 'var(--text-secondary)';
+        } catch (err) {
+          responseEl.textContent = `Error: ${err.message}`;
+          responseEl.style.color = 'var(--danger)';
+        } finally {
+          btn.disabled = false;
+          btn.textContent = I18n.t('playground.test');
+        }
+      });
+
+      // Pre-fill demo address and update snippets
+      document.getElementById('playground-address').value = '0x742d35Cc6634C0532925a3b844Bc9e7595f1b87';
+      updateSnippet('curl', '0x742d35Cc6634C0532925a3b844Bc9e7595f1b87');
+
+      // ─── Utility ───────────────────────────────────────────────────
+      function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).catch(() => {
+          // Fallback
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        });
+      }
+
+      // ─── Init ─────────────────────────────────────────────────────
+      initTheme();
+      updateUserDisplay();
+      loadAll();
+    })();
+  </script>
+</body>
+</html>

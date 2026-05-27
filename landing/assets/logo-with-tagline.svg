@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600;800&amp;family=JetBrains+Mono:wght@700&amp;display=swap');
+      
+      .bg { fill: #0A0E27; }
+      .text-0x { font-family: 'JetBrains Mono', monospace; font-size: 68px; fill: #00D1FF; font-weight: 700; }
+      .text-radar { font-family: 'Inter', sans-serif; font-size: 68px; fill: #FFFFFF; font-weight: 800; letter-spacing: -1px; }
+      .text-app { font-family: 'Inter', sans-serif; font-size: 36px; fill: #8E8E93; font-weight: 600; }
+      .tagline { font-family: 'Inter', sans-serif; font-size: 16px; fill: #8E8E93; letter-spacing: 2px; font-weight: 600; text-transform: uppercase; }
+      
+      .cyan-stroke { stroke: #00D1FF; fill: none; }
+    </style>
+    
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="100%" height="100%" class="bg"/>
+
+  <g transform="translate(400, 230)">
+    
+    <circle cx="0" cy="0" r="110" class="cyan-stroke" stroke-width="2" stroke-dasharray="6 12" opacity="0.3"/>
+    
+    <circle cx="0" cy="0" r="70" class="cyan-stroke" stroke-width="1.5" opacity="0.5"/>
+    <circle cx="0" cy="0" r="30" class="cyan-stroke" stroke-width="1.5" opacity="0.8"/>
+    
+    <circle cx="0" cy="0" r="6" fill="#00D1FF" filter="url(#glow)"/>
+
+    <path d="M 0 0 L 0 -110 A 110 110 0 0 1 77.7 -77.7 Z" fill="#00D1FF" opacity="0.1"/>
+    
+    <line x1="0" y1="0" x2="77.7" y2="-77.7" stroke="#00D1FF" stroke-width="3" stroke-linecap="round" filter="url(#glow)"/>
+
+    <line x1="-140" y1="0" x2="-50" y2="0" stroke="#00D1FF" stroke-width="2" opacity="0.4"/>
+    <line x1="50" y1="0" x2="140" y2="0" stroke="#00D1FF" stroke-width="2" opacity="0.4"/>
+    <line x1="0" y1="-140" x2="0" y2="-50" stroke="#00D1FF" stroke-width="2" opacity="0.4"/>
+    <line x1="0" y1="50" x2="0" y2="140" stroke="#00D1FF" stroke-width="2" opacity="0.4"/>
+    
+    <path d="M -12 -12 L 12 12 M 12 -12 L -12 12" stroke="#0A0E27" stroke-width="4" stroke-linecap="round" />
+    <path d="M -12 -12 L 12 12 M 12 -12 L -12 12" stroke="#00D1FF" stroke-width="2" stroke-linecap="round" />
+  </g>
+
+  <text x="400" y="440" text-anchor="middle">
+    <tspan class="text-0x">0x</tspan>
+    <tspan class="text-radar">Radar</tspan>
+    <tspan class="text-app">.app</tspan>
+  </text>
+
+  <text x="400" y="490" text-anchor="middle" class="tagline">See every wallet. Catch every risk.</text>
+
+</svg>
