@@ -1,0 +1,1389 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "0xRadar API",
+    "description": "Multi-chain wallet intelligence platform — portfolio aggregation, DeFi position monitoring, sweep cost calculation, and token risk scoring across 7+ EVM chains.\n\n**Features:**\n- Real-time multi-chain balance aggregation (parallel `asyncio` fetch)\n- Token metadata enrichment (symbol, name, decimals, logo)\n- CoinGecko USD price integration\n- Sweep consolidation cost calculator (unique differentiator vs DeBank/Zerion)\n- Token risk scoring\n\n**Authentication:** Optional `X-API-Key` header for higher rate limits. Pro tier required for admin endpoints.",
+    "version": "0.3.0",
+    "contact": {
+      "name": "0xRadar Team",
+      "email": "volkanglm@gmail.com",
+      "url": "https://0xradar.app"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    },
+    "x-logo": {
+      "url": "https://0xradar.app/favicon.svg"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.0xradar.app",
+      "description": "Production (Frankfurt)"
+    },
+    {
+      "url": "https://staging-api.0xradar.app",
+      "description": "Staging"
+    }
+  ],
+  "tags": [
+    {
+      "name": "System",
+      "description": "Health check, service info, and chain metadata",
+      "x-displayName": "System"
+    },
+    {
+      "name": "Wallet",
+      "description": "Wallet balances and portfolio across chains",
+      "x-displayName": "Wallet"
+    },
+    {
+      "name": "Sweep",
+      "description": "Sweep consolidation quote — calculate cost to consolidate dust/wallet assets to a single chain",
+      "x-displayName": "Sweep"
+    },
+    {
+      "name": "Admin",
+      "description": "Admin-only endpoints (pro tier API key required)",
+      "x-displayName": "Admin"
+    }
+  ],
+  "security": [],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": ["System"],
+        "summary": "Service info",
+        "description": "Returns basic service metadata and available endpoints. No authentication required.",
+        "operationId": "getServiceInfo",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Service information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceInfo"
+                },
+                "examples": {
+                  "production": {
+                    "summary": "Production response",
+                    "value": {
+                      "app": "0xRadar API",
+                      "version": "0.3.0",
+                      "docs": "/docs",
+                      "endpoints": {
+                        "health": "/v1/health",
+                        "wallet_balances": "/v1/wallet/{address}/balances?chain={chain}",
+                        "wallet_portfolio": "/v1/wallet/{address}/portfolio",
+                        "sweep_quote": "/v1/sweep-quote/{address}"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/health": {
+      "get": {
+        "tags": ["System"],
+        "summary": "Health check",
+        "description": "Returns API health status, version, supported chains, and dependency status. Use for monitoring and uptime checks.",
+        "operationId": "healthCheck",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "API is healthy",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                },
+                "examples": {
+                  "healthy": {
+                    "summary": "All systems operational",
+                    "value": {
+                      "status": "ok",
+                      "service": "0xradar-api",
+                      "version": "0.3.0",
+                      "supported_chains": [
+                        "ethereum", "arbitrum", "base",
+                        "optimism", "polygon", "hyperevm", "bsc"
+                      ],
+                      "chain_count": 7,
+                      "dependencies": {
+                        "redis": "ok"
+                      },
+                      "timestamp": "2026-05-27T06:38:15.395077"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/chains": {
+      "get": {
+        "tags": ["System"],
+        "summary": "List supported chains",
+        "description": "Returns metadata for all 7 supported EVM chains including chain IDs, explorers, and L2 status.",
+        "operationId": "listChains",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "List of supported chains",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChainsResponse"
+                },
+                "examples": {
+                  "allChains": {
+                    "summary": "All 7 supported chains",
+                    "value": {
+                      "chains": [
+                        {
+                          "id": "ethereum",
+                          "name": "Ethereum",
+                          "native_symbol": "ETH",
+                          "chain_id": 1,
+                          "explorer": "https://etherscan.io",
+                          "is_l2": false
+                        },
+                        {
+                          "id": "arbitrum",
+                          "name": "Arbitrum One",
+                          "native_symbol": "ETH",
+                          "chain_id": 42161,
+                          "explorer": "https://arbiscan.io",
+                          "is_l2": true
+                        },
+                        {
+                          "id": "base",
+                          "name": "Base",
+                          "native_symbol": "ETH",
+                          "chain_id": 8453,
+                          "explorer": "https://basescan.org",
+                          "is_l2": true
+                        },
+                        {
+                          "id": "optimism",
+                          "name": "Optimism",
+                          "native_symbol": "ETH",
+                          "chain_id": 10,
+                          "explorer": "https://optimistic.etherscan.io",
+                          "is_l2": true
+                        },
+                        {
+                          "id": "polygon",
+                          "name": "Polygon",
+                          "native_symbol": "POL",
+                          "chain_id": 137,
+                          "explorer": "https://polygonscan.com",
+                          "is_l2": false
+                        },
+                        {
+                          "id": "hyperevm",
+                          "name": "HyperEVM",
+                          "native_symbol": "HYPE",
+                          "chain_id": 999,
+                          "explorer": "https://hyperevmscan.io",
+                          "is_l2": false
+                        },
+                        {
+                          "id": "bsc",
+                          "name": "BNB Smart Chain",
+                          "native_symbol": "BNB",
+                          "chain_id": 56,
+                          "explorer": "https://bscscan.com",
+                          "is_l2": false
+                        }
+                      ],
+                      "count": 7
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/wallet/{address}/balances": {
+      "get": {
+        "tags": ["Wallet"],
+        "summary": "Get wallet balances on a single chain",
+        "description": "Fetches native + ERC-20 token balances for an EVM address on a specific chain. Includes USD values when `include_prices=true`. Results are cached for 5 minutes.\n\n**Free tier:** max 10 tokens returned. **Dev/Pro:** up to 200.",
+        "operationId": "getWalletBalances",
+        "security": [
+          {},
+          { "ApiKeyAuth": [] }
+        ],
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "description": "EVM wallet address (0x prefix, 42 characters)",
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$",
+              "example": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+            }
+          },
+          {
+            "name": "chain",
+            "in": "query",
+            "required": false,
+            "description": "Chain ID to query",
+            "schema": {
+              "type": "string",
+              "enum": ["ethereum", "arbitrum", "base", "optimism", "polygon", "hyperevm", "bsc"],
+              "default": "ethereum",
+              "example": "ethereum"
+            }
+          },
+          {
+            "name": "include_prices",
+            "in": "query",
+            "required": false,
+            "description": "Whether to include USD price and value calculations",
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "example": true
+            }
+          },
+          {
+            "name": "max_tokens",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of ERC-20 tokens to return (free: max 10, paid: max 200)",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 20,
+              "example": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Wallet balances on the requested chain",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BalancesResponse"
+                },
+                "examples": {
+                  "vitalikEthereum": {
+                    "summary": "Vitalik's Ethereum wallet",
+                    "value": {
+                      "address": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+                      "chain": "ethereum",
+                      "chain_info": {
+                        "name": "Ethereum",
+                        "chain_id": 1,
+                        "explorer": "https://etherscan.io"
+                      },
+                      "native": {
+                        "symbol": "ETH",
+                        "balance": "5.68",
+                        "price_usd": "2061.15",
+                        "value_usd": "11706.32"
+                      },
+                      "tokens": [
+                        {
+                          "contract": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+                          "symbol": "USDC",
+                          "name": "USD Coin",
+                          "decimals": 6,
+                          "logo": null,
+                          "balance": "1500.0",
+                          "balance_raw": "1500000000",
+                          "price_usd": "1.00",
+                          "value_usd": "1500.0"
+                        }
+                      ],
+                      "token_count_total": 5,
+                      "token_count_shown": 5,
+                      "total_value_usd": "13206.32",
+                      "timestamp": "2026-05-27T06:38:15.395077"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid address or unsupported chain",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalidAddress": {
+                    "summary": "Invalid address format",
+                    "value": {
+                      "detail": "Invalid EVM address (expected 0x... 42 chars)",
+                      "code": "invalid_address"
+                    }
+                  },
+                  "unsupportedChain": {
+                    "summary": "Chain not supported",
+                    "value": {
+                      "detail": "Unsupported chain 'solana'. Available: ethereum, arbitrum, base, optimism, polygon, hyperevm, bsc",
+                      "code": "unsupported_chain"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/wallet/{address}/portfolio": {
+      "get": {
+        "tags": ["Wallet"],
+        "summary": "Get multi-chain portfolio",
+        "description": "Fetches wallet balances across multiple chains in parallel. Returns aggregated totals and per-chain breakdowns. Results are cached for 5 minutes.\n\n**Free tier:** max 3 chains per request. **Dev/Pro:** up to 20 chains.",
+        "operationId": "getWalletPortfolio",
+        "security": [
+          {},
+          { "ApiKeyAuth": [] }
+        ],
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "description": "EVM wallet address (0x prefix, 42 characters)",
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$",
+              "example": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+            }
+          },
+          {
+            "name": "chains",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated chain IDs. Default: all supported chains. Free tier limits to 3.",
+            "schema": {
+              "type": "string",
+              "example": "ethereum,base,arbitrum"
+            }
+          },
+          {
+            "name": "include_prices",
+            "in": "query",
+            "required": false,
+            "description": "Whether to include USD price and value calculations",
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "example": true
+            }
+          },
+          {
+            "name": "max_tokens_per_chain",
+            "in": "query",
+            "required": false,
+            "description": "Maximum tokens returned per chain",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "example": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Multi-chain portfolio with per-chain breakdown",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortfolioResponse"
+                },
+                "examples": {
+                  "vitalikMultiChain": {
+                    "summary": "Vitalik across Ethereum + Base",
+                    "value": {
+                      "address": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+                      "chains_requested": ["ethereum", "base"],
+                      "chains_with_value": 2,
+                      "total_value_usd": "13250.45",
+                      "total_tokens": 8,
+                      "by_chain": {
+                        "ethereum": {
+                          "address": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+                          "chain": "ethereum",
+                          "chain_info": {
+                            "name": "Ethereum",
+                            "chain_id": 1,
+                            "explorer": "https://etherscan.io"
+                          },
+                          "native": {
+                            "symbol": "ETH",
+                            "balance": "5.68",
+                            "price_usd": "2061.15",
+                            "value_usd": "11706.32"
+                          },
+                          "tokens": [
+                            {
+                              "contract": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+                              "symbol": "USDC",
+                              "name": "USD Coin",
+                              "decimals": 6,
+                              "logo": null,
+                              "balance": "1500.0",
+                              "balance_raw": "1500000000",
+                              "price_usd": "1.00",
+                              "value_usd": "1500.0"
+                            }
+                          ],
+                          "token_count_total": 5,
+                          "token_count_shown": 5,
+                          "total_value_usd": "13206.32",
+                          "timestamp": "2026-05-27T06:38:15.395077"
+                        },
+                        "base": {
+                          "address": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+                          "chain": "base",
+                          "chain_info": {
+                            "name": "Base",
+                            "chain_id": 8453,
+                            "explorer": "https://basescan.org"
+                          },
+                          "native": {
+                            "symbol": "ETH",
+                            "balance": "0.015",
+                            "price_usd": "2061.15",
+                            "value_usd": "44.13"
+                          },
+                          "tokens": [],
+                          "token_count_total": 0,
+                          "token_count_shown": 0,
+                          "total_value_usd": "44.13",
+                          "timestamp": "2026-05-27T06:38:16.102034"
+                        }
+                      },
+                      "errors": [],
+                      "timestamp": "2026-05-27T06:38:16.102034"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid address",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalidAddress": {
+                    "summary": "Invalid address format",
+                    "value": {
+                      "detail": "Invalid EVM address",
+                      "code": "invalid_address"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/sweep-quote/{address}": {
+      "get": {
+        "tags": ["Sweep"],
+        "summary": "Calculate sweep consolidation cost",
+        "description": "Estimates the gas cost to sweep/consolidate all assets from a wallet across specified chains to a target chain. Analyzes each chain's token count, estimates gas costs, and provides a profitability recommendation.\n\n**Unique differentiator:** DeBank, Zerion, and other portfolio trackers do not offer sweep cost calculation.",
+        "operationId": "getSweepQuote",
+        "security": [
+          {},
+          { "ApiKeyAuth": [] }
+        ],
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "description": "EVM wallet address (0x prefix, 42 characters)",
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$",
+              "example": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+            }
+          },
+          {
+            "name": "chains",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated chain IDs to evaluate. Default: all supported chains.",
+            "schema": {
+              "type": "string",
+              "example": "ethereum,arbitrum,base"
+            }
+          },
+          {
+            "name": "target_chain",
+            "in": "query",
+            "required": false,
+            "description": "Chain to consolidate assets to",
+            "schema": {
+              "type": "string",
+              "enum": ["ethereum", "arbitrum", "base", "optimism", "polygon", "hyperevm", "bsc"],
+              "default": "base",
+              "example": "base"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sweep cost summary with profitability analysis",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SweepQuoteResponse"
+                },
+                "examples": {
+                  "profitableCase": {
+                    "summary": "Sweep is profitable (vitalik.eth to Base)",
+                    "value": {
+                      "address": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+                      "chains_evaluated": ["ethereum", "base"],
+                      "target_chain": "base",
+                      "by_chain": [
+                        {
+                          "chain": "ethereum",
+                          "token_count": 5,
+                          "gas_cost_usd": "0.50",
+                          "net_value_usd": "11706.27",
+                          "is_profitable": true
+                        },
+                        {
+                          "chain": "base",
+                          "token_count": 0,
+                          "gas_cost_usd": "0.00",
+                          "net_value_usd": "44.13",
+                          "is_profitable": false
+                        }
+                      ],
+                      "summary": {
+                        "total_gross_value_usd": "13250.45",
+                        "total_gas_cost_usd": "0.50",
+                        "total_net_value_usd": "11750.40",
+                        "recommendation": "sweep",
+                        "recommendation_reason": "Net gain of $11750.40 exceeds gas costs"
+                      },
+                      "timestamp": "2026-05-27T06:38:18.555123"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid address or unsupported target chain",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalidAddress": {
+                    "summary": "Invalid address format",
+                    "value": {
+                      "detail": "Invalid EVM address",
+                      "code": "invalid_address"
+                    }
+                  },
+                  "unsupportedTarget": {
+                    "summary": "Target chain not supported",
+                    "value": {
+                      "detail": "Unsupported target chain: solana",
+                      "code": "unsupported_chain"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/admin/keys": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "List API keys (admin only)",
+        "description": "Returns a list of registered API keys with their hash prefixes and metadata. **Pro tier API key required.** For security, full key values are never exposed — only SHA-256 hash prefixes.",
+        "operationId": "adminListKeys",
+        "security": [
+          { "ApiKeyAuth": [] }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of registered API keys",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminKeysResponse"
+                },
+                "examples": {
+                  "keysList": {
+                    "summary": "Two registered keys",
+                    "value": {
+                      "keys": [
+                        {
+                          "hash_prefix": "a1b2c3d4e5f6",
+                          "user_id": "dev",
+                          "tier": "pro",
+                          "name": "dev test",
+                          "created_at": "2026-05-20T10:00:00Z"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "missingKey": {
+                    "summary": "No API key provided",
+                    "value": {
+                      "detail": "Missing X-API-Key header or api_key query param",
+                      "code": "missing_api_key"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Invalid key or insufficient tier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalidKey": {
+                    "summary": "Invalid API key",
+                    "value": {
+                      "detail": "Invalid API key",
+                      "code": "invalid_api_key"
+                    }
+                  },
+                  "insufficientTier": {
+                    "summary": "Not pro tier",
+                    "value": {
+                      "detail": "Admin tier required",
+                      "code": "insufficient_tier"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "API key for authentication and higher rate limits. Obtain from https://0xradar.app/dashboard. Can also be passed as `?api_key=` query parameter."
+      }
+    },
+    "headers": {
+      "X-RateLimit-Limit": {
+        "description": "Maximum requests allowed in the current time window",
+        "schema": {
+          "type": "integer",
+          "example": 600
+        }
+      },
+      "X-RateLimit-Remaining": {
+        "description": "Requests remaining in the current time window",
+        "schema": {
+          "type": "integer",
+          "example": 595
+        }
+      },
+      "X-RateLimit-Reset": {
+        "description": "Unix timestamp when the rate limit window resets",
+        "schema": {
+          "type": "integer",
+          "example": 1748330400
+        }
+      },
+      "Retry-After": {
+        "description": "Seconds to wait before retrying (sent with 429 responses)",
+        "schema": {
+          "type": "integer",
+          "example": 45
+        }
+      }
+    },
+    "schemas": {
+      "ServiceInfo": {
+        "type": "object",
+        "required": ["app", "version", "docs", "endpoints"],
+        "properties": {
+          "app": {
+            "type": "string",
+            "example": "0xRadar API"
+          },
+          "version": {
+            "type": "string",
+            "example": "0.3.0"
+          },
+          "docs": {
+            "type": "string",
+            "example": "/docs"
+          },
+          "endpoints": {
+            "type": "object",
+            "properties": {
+              "health": { "type": "string" },
+              "wallet_balances": { "type": "string" },
+              "wallet_portfolio": { "type": "string" },
+              "sweep_quote": { "type": "string" }
+            }
+          }
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "required": ["status", "service", "version", "supported_chains", "chain_count", "timestamp"],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["ok", "degraded", "down"],
+            "example": "ok"
+          },
+          "service": {
+            "type": "string",
+            "example": "0xradar-api"
+          },
+          "version": {
+            "type": "string",
+            "example": "0.3.0"
+          },
+          "supported_chains": {
+            "type": "array",
+            "items": { "type": "string" },
+            "example": ["ethereum", "arbitrum", "base", "optimism", "polygon", "hyperevm", "bsc"]
+          },
+          "chain_count": {
+            "type": "integer",
+            "example": 7
+          },
+          "dependencies": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "example": { "redis": "ok" }
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-05-27T06:38:15.395077"
+          }
+        }
+      },
+      "Chain": {
+        "type": "object",
+        "required": ["id", "name", "native_symbol", "chain_id", "explorer", "is_l2"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Canonical chain ID used in API parameters",
+            "example": "ethereum"
+          },
+          "name": {
+            "type": "string",
+            "description": "Human-readable chain name",
+            "example": "Ethereum"
+          },
+          "native_symbol": {
+            "type": "string",
+            "description": "Native gas token symbol",
+            "example": "ETH"
+          },
+          "chain_id": {
+            "type": "integer",
+            "description": "EVM chain ID (per EIP-155)",
+            "example": 1
+          },
+          "explorer": {
+            "type": "string",
+            "format": "uri",
+            "description": "Block explorer URL",
+            "example": "https://etherscan.io"
+          },
+          "is_l2": {
+            "type": "boolean",
+            "description": "Whether this chain is an L2/sidechain",
+            "example": false
+          }
+        }
+      },
+      "ChainsResponse": {
+        "type": "object",
+        "required": ["chains", "count"],
+        "properties": {
+          "chains": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Chain" }
+          },
+          "count": {
+            "type": "integer",
+            "example": 7
+          }
+        }
+      },
+      "NativeBalance": {
+        "type": "object",
+        "required": ["symbol", "balance", "value_usd"],
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "example": "ETH"
+          },
+          "balance": {
+            "type": "string",
+            "description": "Native token balance as decimal string",
+            "example": "5.68"
+          },
+          "price_usd": {
+            "type": ["string", "null"],
+            "description": "Current USD price",
+            "example": "2061.15"
+          },
+          "value_usd": {
+            "type": ["string", "null"],
+            "description": "Total USD value of native balance",
+            "example": "11706.32"
+          }
+        }
+      },
+      "TokenBalance": {
+        "type": "object",
+        "required": ["contract", "symbol", "decimals", "balance", "balance_raw"],
+        "properties": {
+          "contract": {
+            "type": "string",
+            "description": "ERC-20 token contract address",
+            "example": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+          },
+          "symbol": {
+            "type": ["string", "null"],
+            "description": "Token symbol (null if unknown)",
+            "example": "USDC"
+          },
+          "name": {
+            "type": ["string", "null"],
+            "description": "Token name (null if unknown)",
+            "example": "USD Coin"
+          },
+          "decimals": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 18,
+            "description": "Token decimal places",
+            "example": 6
+          },
+          "logo": {
+            "type": ["string", "null"],
+            "format": "uri",
+            "description": "Token logo URL (null if unavailable)",
+            "example": null
+          },
+          "balance": {
+            "type": "string",
+            "description": "Human-readable balance (decimal string)",
+            "example": "1500.0"
+          },
+          "balance_raw": {
+            "type": "string",
+            "description": "Raw balance in smallest unit (wei/satoshi)",
+            "example": "1500000000"
+          },
+          "price_usd": {
+            "type": ["string", "null"],
+            "description": "Current USD price (null if prices disabled or unavailable)",
+            "example": "1.00"
+          },
+          "value_usd": {
+            "type": ["string", "null"],
+            "description": "Total USD value of this token holding (null if prices disabled)",
+            "example": "1500.0"
+          }
+        }
+      },
+      "ChainInfo": {
+        "type": "object",
+        "required": ["name", "chain_id", "explorer"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Ethereum"
+          },
+          "chain_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "explorer": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://etherscan.io"
+          }
+        }
+      },
+      "BalancesResponse": {
+        "type": "object",
+        "required": ["address", "chain", "chain_info", "native", "tokens", "token_count_total", "token_count_shown", "total_value_usd", "timestamp"],
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "Queried wallet address (lowercase)",
+            "example": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+          },
+          "chain": {
+            "type": "string",
+            "example": "ethereum"
+          },
+          "chain_info": {
+            "$ref": "#/components/schemas/ChainInfo"
+          },
+          "native": {
+            "$ref": "#/components/schemas/NativeBalance"
+          },
+          "tokens": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/TokenBalance" }
+          },
+          "token_count_total": {
+            "type": "integer",
+            "description": "Total tokens on this chain (may exceed token_count_shown if truncated)",
+            "example": 5
+          },
+          "token_count_shown": {
+            "type": "integer",
+            "description": "Number of tokens actually returned",
+            "example": 5
+          },
+          "total_value_usd": {
+            "type": "string",
+            "description": "Total portfolio value on this chain (native + tokens)",
+            "example": "13206.32"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-05-27T06:38:15.395077"
+          }
+        }
+      },
+      "PortfolioResponse": {
+        "type": "object",
+        "required": ["address", "chains_requested", "chains_with_value", "total_value_usd", "total_tokens", "by_chain", "errors", "timestamp"],
+        "properties": {
+          "address": {
+            "type": "string",
+            "example": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+          },
+          "chains_requested": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Chain IDs that were requested",
+            "example": ["ethereum", "base"]
+          },
+          "chains_with_value": {
+            "type": "integer",
+            "description": "Number of chains with non-zero balance",
+            "example": 2
+          },
+          "total_value_usd": {
+            "type": "string",
+            "description": "Total USD value across all chains",
+            "example": "13250.45"
+          },
+          "total_tokens": {
+            "type": "integer",
+            "description": "Total token count across all chains",
+            "example": 8
+          },
+          "by_chain": {
+            "type": "object",
+            "description": "Per-chain breakdown. Keys are chain IDs.",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/BalancesResponse"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "chain": { "type": "string" },
+                "error": { "type": "string" }
+              }
+            },
+            "description": "Errors for individual chains (partial success)",
+            "example": []
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-05-27T06:38:16.102034"
+          }
+        }
+      },
+      "SweepChainQuote": {
+        "type": "object",
+        "required": ["chain", "token_count", "gas_cost_usd", "net_value_usd", "is_profitable"],
+        "properties": {
+          "chain": {
+            "type": "string",
+            "description": "Chain being evaluated",
+            "example": "ethereum"
+          },
+          "token_count": {
+            "type": "integer",
+            "description": "Number of tokens on this chain",
+            "example": 5
+          },
+          "gas_cost_usd": {
+            "type": "string",
+            "description": "Estimated gas cost in USD",
+            "example": "0.50"
+          },
+          "net_value_usd": {
+            "type": "string",
+            "description": "Net value after gas costs",
+            "example": "11706.27"
+          },
+          "is_profitable": {
+            "type": "boolean",
+            "description": "Whether sweeping this chain is profitable",
+            "example": true
+          }
+        }
+      },
+      "SweepSummary": {
+        "type": "object",
+        "required": ["recommendation"],
+        "properties": {
+          "total_gross_value_usd": {
+            "type": "string",
+            "example": "13250.45"
+          },
+          "total_gas_cost_usd": {
+            "type": "string",
+            "example": "0.50"
+          },
+          "total_net_value_usd": {
+            "type": "string",
+            "example": "11750.40"
+          },
+          "recommendation": {
+            "type": "string",
+            "enum": ["sweep", "skip", "partial"],
+            "description": "Overall recommendation based on profitability analysis",
+            "example": "sweep"
+          },
+          "recommendation_reason": {
+            "type": "string",
+            "example": "Net gain of $11750.40 exceeds gas costs"
+          }
+        }
+      },
+      "SweepQuoteResponse": {
+        "type": "object",
+        "required": ["address", "chains_evaluated", "target_chain", "by_chain", "summary", "timestamp"],
+        "properties": {
+          "address": {
+            "type": "string",
+            "example": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+          },
+          "chains_evaluated": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Chain IDs that were analyzed",
+            "example": ["ethereum", "base"]
+          },
+          "target_chain": {
+            "type": "string",
+            "description": "Consolidation target chain",
+            "example": "base"
+          },
+          "by_chain": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/SweepChainQuote" }
+          },
+          "summary": {
+            "$ref": "#/components/schemas/SweepSummary"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-05-27T06:38:18.555123"
+          }
+        }
+      },
+      "AdminKey": {
+        "type": "object",
+        "required": ["hash_prefix", "user_id", "tier", "name", "created_at"],
+        "properties": {
+          "hash_prefix": {
+            "type": "string",
+            "description": "First 12 characters of SHA-256 key hash (never exposes full key)",
+            "example": "a1b2c3d4e5f6"
+          },
+          "user_id": {
+            "type": "string",
+            "example": "dev"
+          },
+          "tier": {
+            "type": "string",
+            "enum": ["free", "dev", "pro"],
+            "example": "pro"
+          },
+          "name": {
+            "type": "string",
+            "example": "dev test"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-05-20T10:00:00Z"
+          }
+        }
+      },
+      "AdminKeysResponse": {
+        "type": "object",
+        "required": ["keys"],
+        "properties": {
+          "keys": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/AdminKey" }
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": ["detail"],
+        "properties": {
+          "detail": {
+            "type": "string",
+            "description": "Human-readable error description",
+            "example": "Invalid EVM address (expected 0x... 42 chars)"
+          },
+          "code": {
+            "type": "string",
+            "description": "Machine-readable error code",
+            "example": "invalid_address"
+          }
+        }
+      }
+    },
+    "responses": {
+      "RateLimited": {
+        "description": "Rate limit exceeded",
+        "headers": {
+          "Retry-After": {
+            "$ref": "#/components/headers/Retry-After"
+          },
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/X-RateLimit-Limit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/X-RateLimit-Remaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/X-RateLimit-Reset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "perMinute": {
+                "summary": "Per-minute limit hit (free tier)",
+                "value": {
+                  "detail": "Rate limit exceeded: 10/min for tier 'free'",
+                  "code": "rate_limit_exceeded"
+                }
+              },
+              "perDay": {
+                "summary": "Daily limit hit",
+                "value": {
+                  "detail": "Daily limit exceeded: 100/day for tier 'free'",
+                  "code": "daily_limit_exceeded"
+                }
+              }
+            }
+          }
+        }
+      },
+      "InternalError": {
+        "description": "Internal server error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "generic": {
+                "value": {
+                  "detail": "Internal server error",
+                  "code": "internal_error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-rateLimit": {
+    "description": "Rate limits are tier-based and applied per API key (or per IP for unauthenticated requests).",
+    "tiers": {
+      "free": {
+        "requests_per_minute": 10,
+        "requests_per_day": 100,
+        "max_chains_per_request": 3,
+        "max_tokens_returned": 10
+      },
+      "dev": {
+        "requests_per_minute": 100,
+        "requests_per_day": 10000,
+        "max_chains_per_request": 10,
+        "max_tokens_returned": 100
+      },
+      "pro": {
+        "requests_per_minute": 600,
+        "requests_per_day": 100000,
+        "max_chains_per_request": 20,
+        "max_tokens_returned": 500
+      }
+    }
+  }
+}
