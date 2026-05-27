@@ -72,5 +72,11 @@
   "footerSocials": {
     "github": "https://github.com/0xradarapp",
     "x": "https://x.com/0xradarapp"
-  }
+  },
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/getting-started/introduction"
+    }
+  ]
 }
