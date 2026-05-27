@@ -1,0 +1,85 @@
+---
+title: "Wallet Balances"
+api: "GET /v1/wallet/{address}/balances"
+---
+
+Returns native + ERC-20 token balances for a single wallet address on one chain.
+
+### Auth
+
+Optional `X-API-Key` header (free tier limited to 10 tokens per call).
+
+### Path parameters
+
+<ParamField path="address" type="string" required>
+  EVM wallet address (42-character hex).
+</ParamField>
+
+### Query parameters
+
+<ParamField query="chain" type="string" required default="ethereum">
+  One of: `ethereum`, `arbitrum`, `base`, `optimism`, `polygon`, `bsc`, `hyperevm`
+</ParamField>
+
+<ParamField query="include_prices" type="boolean" default="true">
+  Whether to enrich tokens with USD prices.
+</ParamField>
+
+<ParamField query="max_tokens" type="integer" default="20">
+  Maximum tokens to return. Max `100` (Alchemy provider limit).
+</ParamField>
+
+### Response fields
+
+<ResponseField name="address" type="string">Queried wallet address (lowercased)</ResponseField>
+<ResponseField name="chain" type="string">Chain identifier</ResponseField>
+<ResponseField name="native" type="object">Native token balance + price</ResponseField>
+<ResponseField name="tokens" type="object[]">
+  ERC-20 holdings with metadata + USD prices
+</ResponseField>
+<ResponseField name="total_value_usd" type="string">Sum of all USD values</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -H "X-API-Key: YOUR_API_KEY" \
+  "https://api.0xradar.app/v1/wallet/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/balances?chain=ethereum&max_tokens=5"
+```
+
+```python Python
+import httpx
+url = "https://api.0xradar.app/v1/wallet/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/balances"
+params = {"chain": "ethereum", "max_tokens": 5}
+headers = {"X-API-Key": "YOUR_API_KEY"}
+print(httpx.get(url, params=params, headers=headers).json())
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200
+{
+  "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+  "chain": "ethereum",
+  "native": {
+    "symbol": "ETH",
+    "balance": "5.676920964456558449",
+    "price_usd": "2062.09",
+    "value_usd": "11706.32"
+  },
+  "tokens": [
+    {
+      "contract": "0x...",
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "decimals": 6,
+      "balance": "1500",
+      "price_usd": "1.00",
+      "value_usd": "1500"
+    }
+  ],
+  "token_count_total": 57,
+  "token_count_shown": 5,
+  "total_value_usd": "13206.32",
+  "timestamp": "2026-05-27T05:00:00.000000"
+}
+```
+</ResponseExample>

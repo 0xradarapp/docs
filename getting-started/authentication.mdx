@@ -1,0 +1,54 @@
+---
+title: "Authentication"
+description: "API keys, tiers, and how to authenticate requests"
+---
+
+# Authentication
+
+0xRadar uses an API key passed in the `X-API-Key` header. All `v1` endpoints except `/health` and `/chains` require authentication.
+
+## Getting an API key
+
+1. Sign up at [0xradar.app](https://0xradar.app)
+2. Navigate to **Dashboard → API Keys**
+3. Click **Generate Key**
+4. Copy the key — it is shown only once
+
+<Warning>
+  Store your API key in a secrets manager. Never commit it to version control.
+</Warning>
+
+## Using the key
+
+```bash
+curl -H "X-API-Key: rk_live_xxxxxxxxxxxxxxxx" \
+  https://api.0xradar.app/v1/wallet/0x.../balances?chain=ethereum
+```
+
+<Note>
+  Query parameter `?api_key=` is **not supported** for security reasons (URL exposure in logs, browser history).
+</Note>
+
+## Tiers
+
+| Tier | Rate Limit | Daily Cap | Best For |
+|------|-----------|-----------|----------|
+| Free | 10 requests/min | 100/day | Prototyping, personal dashboards |
+| Dev | 100 requests/min | 10,000/day | Startups, small integrations |
+| Pro | 600 requests/min | 100,000/day | Production apps, high-frequency polling |
+
+Tier assignment is tied to your API key. Upgrade or downgrade from the Dashboard.
+
+## Error responses
+
+| Status | Meaning | Resolution |
+|--------|---------|-----------|
+| 401 Unauthorized | Missing or invalid key | Check header spelling and key validity |
+| 403 Forbidden | Key valid but tier scope denied | Upgrade tier |
+| 429 Too Many Requests | Rate limit exceeded | Back off and retry with exponential jitter |
+| 503 Service Unavailable | Rate limiter temporarily down | Retry after 5-10 sec |
+
+## Next steps
+
+- Review [Rate Limits](/getting-started/rate-limits) for headers and retry logic
+- Browse the [API Reference](/api/health)

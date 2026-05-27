@@ -1,0 +1,52 @@
+---
+title: "Monitoring Positions"
+description: "Phase 2 preview: real-time wallet alerts"
+---
+
+# Monitoring Positions (Phase 2)
+
+Planned for Q3 2026. Subscribe to on-chain events and receive webhooks/Telegram alerts when wallet state changes.
+
+## What you'll be able to do
+
+- **Balance change alerts** — Get notified when a tracked wallet receives or sends tokens
+- **Liquidation alerts** — Telegram alert when DeFi position health factor drops below 1.2 (Aave V3, Compound V3, Morpho Blue, HyperLend, Kamino)
+- **Price threshold triggers** — Alert when a holding drops below or rises above a USD threshold
+- **New token detection** — Be the first to know when a whale wallet acquires a new position
+
+## Planned API
+
+```bash
+POST /v1/watchlists
+{
+  "name": "Treasury Wallets",
+  "addresses": ["0x...", "0x..."],
+  "webhook_url": "https://your-app.com/webhooks/0xradar",
+  "telegram_chat_id": 12345,
+  "filters": {
+    "min_usd_value": 100,
+    "chains": ["ethereum", "arbitrum"],
+    "health_factor_threshold": 1.2
+  }
+}
+```
+
+## Webhook payload shape
+
+```json
+{
+  "event": "position.health_low",
+  "watchlist_id": "wl_123",
+  "address": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+  "chain": "ethereum",
+  "protocol": "aave_v3",
+  "health_factor": "1.15",
+  "collateral_usd": "50000",
+  "debt_usd": "30000",
+  "timestamp": "2026-08-27T12:00:00Z"
+}
+```
+
+## Get early access
+
+Monitoring will launch first for Pro tier users. Email `earlyaccess@0xradar.app` to join the beta.

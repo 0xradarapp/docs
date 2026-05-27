@@ -1,0 +1,52 @@
+---
+title: "Introduction"
+description: "Multi-chain wallet intelligence for developers"
+---
+
+# 0xRadar
+
+0xRadar is a multi-chain wallet intelligence API built for developers who need real-time token balances, portfolio tracking, and sweep cost analysis across 7 EVM chains.
+
+## What it does
+
+- **Single-chain balances**: Query every ERC-20 holding for any address on Ethereum, Arbitrum, Base, Optimism, Polygon, BSC, or HyperEVM.
+- **Multi-chain portfolio**: Aggregate balances across chains in one call with USD denomination.
+- **Sweep quotes**: Estimate gas costs to consolidate dust tokens from multiple chains into one.
+
+## Who it's for
+
+- **Wallet app builders** building portfolio screens
+- **Security tool developers** monitoring treasury or hot wallets
+- **DeFi integrators** needing pre-transaction balance checks
+- **Python/JS developers** who want typed, fast HTTP APIs without running their own nodes
+
+## Supported chains
+
+| Chain | Identifier |
+|-------|-----------|
+| Ethereum | `ethereum` |
+| Arbitrum One | `arbitrum` |
+| Base | `base` |
+| Optimism | `optimism` |
+| Polygon PoS | `polygon` |
+| BNB Smart Chain | `bsc` |
+| HyperEVM | `hyperevm` |
+
+## Base URL
+
+```
+https://api.0xradar.app
+```
+
+All endpoints are served over HTTPS. Version `v1` is the current stable release.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="bolt" href="/getting-started/quickstart">
+    Make your first API call in 5 minutes
+  </Card>
+  <Card title="Authentication" icon="key" href="/getting-started/authentication">
+    Get an API key and understand tiers
+  </Card>
+</CardGroup>

@@ -1,0 +1,67 @@
+---
+title: "Quickstart"
+description: "Make your first 0xRadar API call in under 5 minutes"
+---
+
+# Quickstart
+
+This guide walks you through your first API call: fetching the token balances of Vitalik's wallet on Ethereum.
+
+## Prerequisites
+
+- A 0xRadar API key ([get one here](/getting-started/authentication))
+- `curl`, Python 3.8+, or Node.js 18+
+
+## Step 1: Pick a wallet
+
+We'll use a well-known address for this example:
+
+```
+0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
+```
+
+## Step 2: Make the request
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://api.0xradar.app/v1/wallet/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/balances?chain=ethereum&max_tokens=5" \
+  -H "X-API-Key: YOUR_API_KEY"
+```
+
+```python Python
+import httpx
+
+url = "https://api.0xradar.app/v1/wallet/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/balances"
+params = {"chain": "ethereum", "max_tokens": 5}
+headers = {"X-API-Key": "YOUR_API_KEY"}
+
+response = httpx.get(url, params=params, headers=headers)
+data = response.json()
+print(data)
+```
+
+```javascript JavaScript
+const url = new URL("https://api.0xradar.app/v1/wallet/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/balances");
+url.searchParams.set("chain", "ethereum");
+url.searchParams.set("max_tokens", "5");
+
+const res = await fetch(url, {
+  headers: { "X-API-Key": "YOUR_API_KEY" }
+});
+const data = await res.json();
+console.log(data);
+```
+</CodeGroup>
+
+## Step 3: Multi-chain portfolio
+
+```bash
+curl -H "X-API-Key: YOUR_API_KEY" \
+  "https://api.0xradar.app/v1/wallet/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/portfolio?chains=ethereum,base,arbitrum"
+```
+
+## What's next?
+
+- Read the [Authentication](/getting-started/authentication) guide
+- Explore the [API Reference](/api/health)
+- Check [Rate Limits](/getting-started/rate-limits) before production load

@@ -1,0 +1,48 @@
+---
+title: "TypeScript / JavaScript SDK"
+---
+
+# TypeScript SDK
+
+A typed TypeScript SDK for Node.js and browsers is in development.
+
+## Installation (coming soon)
+
+```bash
+npm install @0xradar/sdk
+```
+
+## Planned interface
+
+```typescript
+import { RadarClient } from "@0xradar/sdk";
+
+const client = new RadarClient({ apiKey: "rk_live_xxx" });
+
+// Single chain
+const balances = await client.balances({
+  address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+  chain: "ethereum",
+});
+
+// Multi-chain portfolio
+const portfolio = await client.portfolio({
+  address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+  chains: ["ethereum", "base"],
+});
+
+// Sweep quote
+const quote = await client.sweepQuote({
+  address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+  chains: ["eth", "base"],
+  targetChain: "base",
+});
+```
+
+## Current workaround
+
+Until the SDK is published, use `fetch` directly as shown in the [API Reference](/api/wallet-balances).
+
+<Info>
+  Star [0xradarapp/sdk-typescript](https://github.com/0xradarapp/sdk-typescript) on GitHub to get notified on release.
+</Info>

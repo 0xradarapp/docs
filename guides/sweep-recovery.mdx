@@ -1,0 +1,63 @@
+---
+title: "Sweep Recovery"
+description: "How to use sweep quotes to consolidate dust tokens"
+---
+
+# Sweep Recovery
+
+Dust tokens scattered across chains are expensive to track and worthless individually. 0xRadar's sweep quote endpoint estimates the gas cost to consolidate them.
+
+## When to use sweep quotes
+
+- Wallet has 20+ small balances across L2s
+- Preparing a treasury migration
+- Cleaning up a hot wallet before rotation
+- Reviving an old wallet from 2020-2023
+
+## Step-by-step
+
+### 1. Get the quote
+
+```bash
+curl -H "X-API-Key: YOUR_API_KEY" \
+  "https://api.0xradar.app/v1/sweep-quote/0xYOUR_ADDRESS?chains=eth,arb,base,polygon&target_chain=base"
+```
+
+### 2. Evaluate cost vs value
+
+```json
+{
+  "summary": {
+    "total_gross_value_usd": "18320.18",
+    "total_gas_cost_usd": "0.67",
+    "total_net_value_usd": "18319.50",
+    "recommendation": "sweep"
+  }
+}
+```
+
+If `recommendation` is `"wait"`, the value doesn't justify gas cost yet.
+
+### 3. Execute the sweep (off-API)
+
+0xRadar provides the quote only. To execute:
+
+1. Use your preferred bridge + DEX aggregator (e.g. [Across](https://across.to) + [1inch](https://1inch.io))
+2. Swap dust to the target chain's native gas token or a stablecoin
+3. Consolidate to your target wallet
+
+### 4. Verify post-sweep
+
+Query `/portfolio` after the operation to confirm balances moved:
+
+```bash
+curl -H "X-API-Key: YOUR_API_KEY" \
+  "https://api.0xradar.app/v1/wallet/0xYOUR_ADDRESS/portfolio?chains=base"
+```
+
+## Safety notes
+
+- Always simulate transactions in [Tenderly](https://tenderly.co) before sending
+- Be aware of bridge latency — funds may not arrive for 5–30 minutes
+- Some tokens have transfer taxes or blacklists that prevent sweeping
+- Test with small amount first ($1-10)

@@ -1,0 +1,56 @@
+---
+title: "Health"
+api: "GET /v1/health"
+---
+
+Returns the current operational status of the API and dependencies. No authentication required.
+
+### Response
+
+<ResponseField name="status" type="string">
+  `"ok"` when healthy, `"degraded"` when dependencies are down.
+</ResponseField>
+
+<ResponseField name="version" type="string">
+  Current API version.
+</ResponseField>
+
+<ResponseField name="supported_chains" type="string[]">
+  Array of supported chain identifiers.
+</ResponseField>
+
+<ResponseField name="dependencies" type="object">
+  Per-dependency status (redis, etc.)
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl https://api.0xradar.app/v1/health
+```
+
+```python Python
+import httpx
+print(httpx.get("https://api.0xradar.app/v1/health").json())
+```
+
+```javascript JavaScript
+const res = await fetch("https://api.0xradar.app/v1/health");
+console.log(await res.json());
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200
+{
+  "status": "ok",
+  "service": "0xradar-api",
+  "version": "0.3.0",
+  "supported_chains": ["ethereum", "arbitrum", "base", "optimism", "polygon", "bsc", "hyperevm"],
+  "chain_count": 7,
+  "dependencies": {
+    "redis": "ok"
+  },
+  "timestamp": "2026-05-27T05:00:00.000000"
+}
+```
+</ResponseExample>

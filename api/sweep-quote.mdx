@@ -1,0 +1,84 @@
+---
+title: "Sweep Quote"
+api: "GET /v1/sweep-quote/{address}"
+---
+
+Estimates gas cost to sweep (consolidate) tokens from specified source chains.
+
+<Note>
+  **This endpoint is unique to 0xRadar.** DeBank, Zerion, and GoPlus do not provide sweep cost estimates.
+</Note>
+
+### Auth
+
+Optional. Free tier: max 3 chains.
+
+### Path parameters
+
+<ParamField path="address" type="string" required>EVM wallet address</ParamField>
+
+### Query parameters
+
+<ParamField query="chains" type="string">
+  Comma-separated source chains. Default: all supported.
+</ParamField>
+
+<ParamField query="target_chain" type="string" default="base">
+  Consolidation destination chain (default: Base for lowest gas)
+</ParamField>
+
+### Response
+
+<ResponseField name="by_chain" type="object[]">
+  Per-chain sweep estimate.
+  <Expandable title="Chain estimate">
+    <ResponseField name="token_count" type="integer">Tokens to transfer</ResponseField>
+    <ResponseField name="gas_units_required" type="integer">Total gas units</ResponseField>
+    <ResponseField name="gas_price_gwei" type="string">Current gas price</ResponseField>
+    <ResponseField name="gas_cost_usd" type="string">Total USD cost</ResponseField>
+    <ResponseField name="gross_value_usd" type="string">Value before fees</ResponseField>
+    <ResponseField name="net_value_usd" type="string">Value after gas cost</ResponseField>
+    <ResponseField name="is_profitable" type="boolean">Whether sweep is economically viable</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="summary" type="object">
+  Aggregated totals + recommendation (`"sweep"` or `"wait"`).
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -H "X-API-Key: YOUR_API_KEY" \
+  "https://api.0xradar.app/v1/sweep-quote/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045?chains=eth,base,arb&target_chain=base"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200
+{
+  "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+  "chains_evaluated": ["ethereum", "base", "arbitrum"],
+  "target_chain": "base",
+  "by_chain": [
+    {
+      "chain": "ethereum",
+      "token_count": 50,
+      "gas_units_required": 3271000,
+      "gas_price_gwei": "0.07",
+      "gas_cost_usd": "0.50",
+      "gross_value_usd": "11706.77",
+      "net_value_usd": "11706.27",
+      "is_profitable": true
+    }
+  ],
+  "summary": {
+    "total_gross_value_usd": "18320.18",
+    "total_gas_cost_usd": "0.67",
+    "total_net_value_usd": "18319.50",
+    "profitable_chains": 3,
+    "recommendation": "sweep"
+  },
+  "timestamp": "2026-05-27T05:00:00"
+}
+```
+</ResponseExample>

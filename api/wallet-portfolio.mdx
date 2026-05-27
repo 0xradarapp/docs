@@ -1,0 +1,67 @@
+---
+title: "Wallet Portfolio"
+api: "GET /v1/wallet/{address}/portfolio"
+---
+
+Aggregated multi-chain balances in a single call. Returns a per-chain breakdown and total USD value.
+
+### Auth
+
+Optional. Free tier: max 3 chains per call. Paid tiers: all 7.
+
+### Path parameters
+
+<ParamField path="address" type="string" required>EVM wallet address</ParamField>
+
+### Query parameters
+
+<ParamField query="chains" type="string">
+  Comma-separated chain identifiers. Default: all supported.
+</ParamField>
+
+<ParamField query="include_prices" type="boolean" default="true">USD price enrichment</ParamField>
+
+<ParamField query="max_tokens_per_chain" type="integer" default="20">Max `100`</ParamField>
+
+### Response
+
+<ResponseField name="address" type="string">Queried wallet</ResponseField>
+<ResponseField name="chains_requested" type="string[]">Chains in this response</ResponseField>
+<ResponseField name="chains_with_value" type="integer">Chains where value > $0.01</ResponseField>
+<ResponseField name="total_value_usd" type="string">Sum across all chains</ResponseField>
+<ResponseField name="total_tokens" type="integer">Total token count</ResponseField>
+<ResponseField name="by_chain" type="object">Per-chain breakdown (same shape as `/balances`)</ResponseField>
+<ResponseField name="errors" type="object[]">Chain-level failures (graceful degradation)</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -H "X-API-Key: YOUR_API_KEY" \
+  "https://api.0xradar.app/v1/wallet/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/portfolio?chains=ethereum,base&max_tokens_per_chain=10"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200
+{
+  "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+  "chains_requested": ["ethereum", "base"],
+  "chains_with_value": 2,
+  "total_value_usd": "18319.47",
+  "total_tokens": 142,
+  "by_chain": {
+    "ethereum": {
+      "native": {"symbol": "ETH", "balance": "5.68", "value_usd": "11706.32"},
+      "tokens": [...],
+      "total_value_usd": "11706.32"
+    },
+    "base": {
+      "native": {"symbol": "ETH", "balance": "3.12", "value_usd": "6440.70"},
+      "tokens": [...],
+      "total_value_usd": "6440.70"
+    }
+  },
+  "errors": [],
+  "timestamp": "2026-05-27T05:00:00"
+}
+```
+</ResponseExample>

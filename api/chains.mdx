@@ -1,0 +1,43 @@
+---
+title: "Supported Chains"
+api: "GET /v1/chains"
+---
+
+Returns the list of supported blockchain networks with metadata.
+
+### Response
+
+<ResponseField name="chains" type="object[]">
+  Array of chain objects.
+  <Expandable title="Chain object">
+    <ResponseField name="id" type="string">Identifier for use in other endpoints</ResponseField>
+    <ResponseField name="name" type="string">Display name</ResponseField>
+    <ResponseField name="native_symbol" type="string">Native token symbol</ResponseField>
+    <ResponseField name="chain_id" type="integer">EVM chain ID</ResponseField>
+    <ResponseField name="explorer" type="string">Block explorer URL</ResponseField>
+    <ResponseField name="is_l2" type="boolean">Whether this is a Layer 2</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl https://api.0xradar.app/v1/chains
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200
+{
+  "chains": [
+    {"id": "ethereum", "name": "Ethereum", "native_symbol": "ETH", "chain_id": 1, "explorer": "https://etherscan.io", "is_l2": false},
+    {"id": "arbitrum", "name": "Arbitrum One", "native_symbol": "ETH", "chain_id": 42161, "explorer": "https://arbiscan.io", "is_l2": true},
+    {"id": "base", "name": "Base", "native_symbol": "ETH", "chain_id": 8453, "explorer": "https://basescan.org", "is_l2": true},
+    {"id": "optimism", "name": "Optimism", "native_symbol": "ETH", "chain_id": 10, "explorer": "https://optimistic.etherscan.io", "is_l2": true},
+    {"id": "polygon", "name": "Polygon", "native_symbol": "POL", "chain_id": 137, "explorer": "https://polygonscan.com", "is_l2": false},
+    {"id": "bsc", "name": "BNB Smart Chain", "native_symbol": "BNB", "chain_id": 56, "explorer": "https://bscscan.com", "is_l2": false},
+    {"id": "hyperevm", "name": "HyperEVM", "native_symbol": "HYPE", "chain_id": 999, "explorer": "https://hyperevmscan.io", "is_l2": false}
+  ],
+  "count": 7
+}
+```
+</ResponseExample>

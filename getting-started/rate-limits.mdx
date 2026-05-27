@@ -1,0 +1,63 @@
+---
+title: "Rate Limits"
+description: "Tier limits, headers, and retry behavior"
+---
+
+# Rate Limits
+
+Rate limits are enforced per API key. Exceeding a limit returns `429 Too Many Requests`.
+
+## Limits by tier
+
+| Tier | Requests / minute | Requests / day |
+|------|------------------|----------------|
+| Free | 10 | 100 |
+| Dev | 100 | 10,000 |
+| Pro | 600 | 100,000 |
+
+Limits reset on a rolling window.
+
+## Handling 429
+
+When you hit a limit, back off and retry with exponential jitter:
+
+<CodeGroup>
+```python Python
+import time, random, httpx
+
+def get_with_backoff(url, headers, params, max_retries=3):
+    for attempt in range(max_retries):
+        r = httpx.get(url, headers=headers, params=params)
+        if r.status_code != 429:
+            return r
+        sleep = (2 ** attempt) + random.uniform(0, 1)
+        time.sleep(sleep)
+    raise Exception("Rate limited")
+```
+
+```javascript JavaScript
+async function getWithBackoff(url, headers, maxRetries = 3) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const res = await fetch(url, { headers });
+    if (res.status !== 429) return res;
+    const sleep = (2 ** attempt) + Math.random();
+    await new Promise(r => setTimeout(r, sleep * 1000));
+  }
+  throw new Error("Rate limited");
+}
+```
+</CodeGroup>
+
+## Tips
+
+- Cache `/chains` — it rarely changes
+- Use `/portfolio` instead of looping `/balances` across chains
+- Consider webhooks (Phase 2) instead of polling for alerts
+
+## Error response
+
+```json
+{"detail":"Rate limit exceeded: 100/min for tier 'dev'. Retry after 42s."}
+```
+
+Response header: `Retry-After: 42`

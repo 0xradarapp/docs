@@ -1,0 +1,48 @@
+---
+title: "Python SDK"
+---
+
+# Python SDK
+
+A native Python SDK for 0xRadar is in development.
+
+## Installation (coming soon)
+
+```bash
+pip install zeroxradar
+```
+
+## Planned interface
+
+```python
+from zeroxradar import Client
+
+client = Client(api_key="rk_live_xxx")
+
+# Single chain
+balances = client.balances(
+    address="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+    chain="ethereum"
+)
+
+# Multi-chain portfolio
+portfolio = client.portfolio(
+    address="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+    chains=["ethereum", "base"]
+)
+
+# Sweep quote
+quote = client.sweep_quote(
+    address="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+    chains=["eth", "base"],
+    target_chain="base"
+)
+```
+
+## Current workaround
+
+Until the SDK is published, use `httpx` directly as shown in the [API Reference](/api/wallet-balances).
+
+<Info>
+  Star [0xradarapp/sdk-python](https://github.com/0xradarapp/sdk-python) on GitHub to get notified on release.
+</Info>

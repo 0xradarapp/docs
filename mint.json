@@ -1,0 +1,92 @@
+{
+  "name": "0xRadar Docs",
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#00D1FF",
+    "light": "#00D1FF",
+    "dark": "#00D1FF",
+    "background": {
+      "dark": "#0A0E27"
+    },
+    "anchors": {
+      "from": "#00D1FF",
+      "to": "#00A3CC"
+    }
+  },
+  "theme": "prism",
+  "modeToggle": {
+    "default": "dark",
+    "isHidden": false
+  },
+  "topbarLinks": [
+    {
+      "name": "API Status",
+      "url": "https://api.0xradar.app/v1/health"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Dashboard",
+    "url": "https://0xradar.app"
+  },
+  "tabs": [
+    {"name": "Getting Started", "url": "getting-started"},
+    {"name": "API Reference", "url": "api"},
+    {"name": "SDKs", "url": "sdks"},
+    {"name": "Guides", "url": "guides"},
+    {"name": "Pricing", "url": "pricing"}
+  ],
+  "anchors": [
+    {"name": "GitHub", "icon": "github", "url": "https://github.com/0xradarapp"},
+    {"name": "Twitter / X", "icon": "twitter", "url": "https://x.com/0xradarapp"}
+  ],
+  "navigation": [
+    {
+      "group": "Getting Started",
+      "pages": [
+        "getting-started/introduction",
+        "getting-started/quickstart",
+        "getting-started/authentication",
+        "getting-started/rate-limits"
+      ]
+    },
+    {
+      "group": "API Reference",
+      "pages": [
+        "api/health",
+        "api/chains",
+        "api/wallet-balances",
+        "api/wallet-portfolio",
+        "api/sweep-quote"
+      ]
+    },
+    {
+      "group": "SDKs",
+      "pages": ["sdks/python", "sdks/typescript"]
+    },
+    {
+      "group": "Guides",
+      "pages": ["guides/monitoring-positions", "guides/sweep-recovery"]
+    },
+    {
+      "group": "Pricing",
+      "pages": ["pricing"]
+    }
+  ],
+  "footerSocials": {
+    "github": "https://github.com/0xradarapp",
+    "x": "https://x.com/0xradarapp"
+  },
+  "openapi": "/openapi.json",
+  "api": {
+    "baseUrl": "https://api.0xradar.app",
+    "auth": {
+      "method": "key",
+      "name": "X-API-Key",
+      "inputMode": "password"
+    }
+  }
+}
