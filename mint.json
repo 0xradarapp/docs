@@ -5,37 +5,12 @@
   "colors": {
     "primary": "#00D1FF",
     "light": "#00D1FF",
-    "dark": "#0A0E27",
-    "anchors": {
-      "from": "#00D1FF",
-      "to": "#00A3CC"
-    }
+    "dark": "#0A0E27"
   },
-  "theme": "prism",
-  "modeToggle": {
-    "default": "dark",
-    "isHidden": false
-  },
-  "topbarLinks": [
-    {
-      "name": "API Status",
-      "url": "https://api.0xradar.app/v1/health"
-    }
-  ],
   "topbarCtaButton": {
     "name": "Get API Key",
     "url": "https://0xradar.app"
   },
-  "tabs": [
-    {"name": "Getting Started", "url": "getting-started"},
-    {"name": "API Reference", "url": "api"},
-    {"name": "SDKs", "url": "sdks"},
-    {"name": "Guides", "url": "guides"}
-  ],
-  "anchors": [
-    {"name": "GitHub", "icon": "github", "url": "https://github.com/0xradarapp"},
-    {"name": "Twitter / X", "icon": "twitter", "url": "https://x.com/0xradarapp"}
-  ],
   "navigation": [
     {
       "group": "Getting Started",
