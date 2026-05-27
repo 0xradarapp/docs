@@ -1,0 +1,78 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "0xRadar",
+  "colors": {
+    "primary": "#00D1FF",
+    "light": "#00D1FF",
+    "dark": "#0A0E27"
+  },
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "getting-started/introduction",
+              "getting-started/quickstart",
+              "getting-started/authentication",
+              "getting-started/rate-limits"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/monitoring-positions",
+              "guides/sweep-recovery"
+            ]
+          },
+          {
+            "group": "SDKs",
+            "pages": [
+              "sdks/python",
+              "sdks/typescript"
+            ]
+          },
+          {
+            "group": "Pricing",
+            "pages": ["pricing"]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Endpoints",
+            "pages": [
+              "api/health",
+              "api/chains",
+              "api/wallet-balances",
+              "api/wallet-portfolio",
+              "api/sweep-quote"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "navbar": {
+    "primary": {
+      "type": "button",
+      "label": "Get API Key",
+      "href": "https://0xradar.app"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/0xradarapp",
+      "x": "https://x.com/0xradarapp"
+    }
+  },
+  "api": {
+    "openapi": "/openapi.json"
+  }
+}
