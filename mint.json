@@ -1,17 +1,10 @@
 {
-  "name": "0xRadar Docs",
-  "logo": {
-    "dark": "/logo/dark.svg",
-    "light": "/logo/light.svg"
-  },
-  "favicon": "/favicon.svg",
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "0xRadar",
   "colors": {
     "primary": "#00D1FF",
     "light": "#00D1FF",
-    "dark": "#00D1FF",
-    "background": {
-      "dark": "#0A0E27"
-    },
+    "dark": "#0A0E27",
     "anchors": {
       "from": "#00D1FF",
       "to": "#00A3CC"
@@ -29,15 +22,14 @@
     }
   ],
   "topbarCtaButton": {
-    "name": "Dashboard",
+    "name": "Get API Key",
     "url": "https://0xradar.app"
   },
   "tabs": [
     {"name": "Getting Started", "url": "getting-started"},
     {"name": "API Reference", "url": "api"},
     {"name": "SDKs", "url": "sdks"},
-    {"name": "Guides", "url": "guides"},
-    {"name": "Pricing", "url": "pricing"}
+    {"name": "Guides", "url": "guides"}
   ],
   "anchors": [
     {"name": "GitHub", "icon": "github", "url": "https://github.com/0xradarapp"},
@@ -79,14 +71,5 @@
   "footerSocials": {
     "github": "https://github.com/0xradarapp",
     "x": "https://x.com/0xradarapp"
-  },
-  "openapi": "/openapi.json",
-  "api": {
-    "baseUrl": "https://api.0xradar.app",
-    "auth": {
-      "method": "key",
-      "name": "X-API-Key",
-      "inputMode": "password"
-    }
   }
 }
