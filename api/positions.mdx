@@ -1,0 +1,190 @@
+---
+title: "DeFi Positions"
+api: "GET /v1/positions/{address}"
+---
+
+Returns open DeFi positions across 5 major protocols on 6 EVM chains. Covers lending supply/borrow, liquidity pool positions (including out-of-range Uniswap V3 ranges), and collateral health.
+
+<Note>
+  **Heavy endpoint.** Each call fans out to multiple on-chain data sources simultaneously. Free tier is rate-limited to 5 requests/minute. Consider upgrading to **Pro** for higher throughput and historical snapshots.
+</Note>
+
+### Auth
+
+`X-API-Key` header required.
+
+### Path parameters
+
+<ParamField path="address" type="string" required>
+  EVM wallet address (42-character hex, checksum or lowercase).
+</ParamField>
+
+### Query parameters
+
+<ParamField query="protocols" type="string">
+  Comma-separated list of protocols to fetch. Defaults to all supported protocols.
+
+  Supported values: `aave_v3`, `hyperlend`, `sentiment_v2`, `uniswap_v3`, `compound_v3`
+</ParamField>
+
+### Supported chains
+
+`ethereum`, `arbitrum`, `base`, `optimism`, `polygon`, `hyperevm`
+
+<Note>
+  HyperEVM is supported for **HyperLend** positions only. Solana is not supported by this endpoint.
+</Note>
+
+### Response fields
+
+<ResponseField name="address" type="string">Queried wallet address (lowercased)</ResponseField>
+<ResponseField name="protocols_requested" type="string[]">Protocols included in this response</ResponseField>
+<ResponseField name="total_supplied_usd" type="string">Total USD value supplied across all protocols</ResponseField>
+<ResponseField name="total_borrowed_usd" type="string">Total USD value borrowed across all protocols</ResponseField>
+<ResponseField name="total_lp_value_usd" type="string">Total USD value of liquidity positions</ResponseField>
+<ResponseField name="positions" type="object">
+  Per-protocol position breakdown.
+  <Expandable title="Protocol position object">
+    <ResponseField name="protocol" type="string">Protocol identifier</ResponseField>
+    <ResponseField name="chain" type="string">Chain the position lives on</ResponseField>
+    <ResponseField name="type" type="string">`lending` or `lp`</ResponseField>
+    <ResponseField name="supplied" type="object[]">Assets supplied (lending positions)</ResponseField>
+    <ResponseField name="borrowed" type="object[]">Assets borrowed (lending positions)</ResponseField>
+    <ResponseField name="health_factor" type="string">Liquidation health factor (lending). `null` if no borrow.</ResponseField>
+    <ResponseField name="lp_positions" type="object[]">
+      Liquidity pool positions.
+      <Expandable title="LP position">
+        <ResponseField name="token_id" type="integer">NFT token ID (Uniswap V3)</ResponseField>
+        <ResponseField name="pool" type="string">Pool address</ResponseField>
+        <ResponseField name="token0" type="string">First token symbol</ResponseField>
+        <ResponseField name="token1" type="string">Second token symbol</ResponseField>
+        <ResponseField name="fee_tier" type="integer">Fee tier in bps (e.g. 500 = 0.05%)</ResponseField>
+        <ResponseField name="tick_lower" type="integer">Lower price tick</ResponseField>
+        <ResponseField name="tick_upper" type="integer">Upper price tick</ResponseField>
+        <ResponseField name="current_tick" type="integer">Current pool tick</ResponseField>
+        <ResponseField name="in_range" type="boolean">Whether position is currently earning fees</ResponseField>
+        <ResponseField name="value_usd" type="string">Total USD value of liquidity</ResponseField>
+        <ResponseField name="uncollected_fees_usd" type="string">Accrued uncollected fees in USD</ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="timestamp" type="string">ISO 8601 timestamp of data fetch</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -H "X-API-Key: YOUR_API_KEY" \
+  "https://api.0xradar.app/v1/positions/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045?protocols=aave_v3,uniswap_v3"
+```
+
+```python Python
+import httpx
+
+url = "https://api.0xradar.app/v1/positions/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+params = {"protocols": "aave_v3,uniswap_v3"}
+headers = {"X-API-Key": "YOUR_API_KEY"}
+
+data = httpx.get(url, params=params, headers=headers).json()
+print(data["total_supplied_usd"])
+```
+
+```javascript JavaScript
+const address = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
+const res = await fetch(
+  `https://api.0xradar.app/v1/positions/${address}?protocols=aave_v3,uniswap_v3`,
+  { headers: { "X-API-Key": "YOUR_API_KEY" } }
+);
+const data = await res.json();
+console.log(data.total_supplied_usd);
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200
+{
+  "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+  "protocols_requested": ["aave_v3", "uniswap_v3"],
+  "total_supplied_usd": "42310.55",
+  "total_borrowed_usd": "18000.00",
+  "total_lp_value_usd": "9875.22",
+  "positions": [
+    {
+      "protocol": "aave_v3",
+      "chain": "ethereum",
+      "type": "lending",
+      "supplied": [
+        {
+          "symbol": "WETH",
+          "amount": "15.25",
+          "value_usd": "31440.73",
+          "apy": "0.82"
+        },
+        {
+          "symbol": "USDC",
+          "amount": "10869.82",
+          "value_usd": "10869.82",
+          "apy": "4.51"
+        }
+      ],
+      "borrowed": [
+        {
+          "symbol": "USDC",
+          "amount": "18000.00",
+          "value_usd": "18000.00",
+          "apy": "5.22"
+        }
+      ],
+      "health_factor": "2.35"
+    },
+    {
+      "protocol": "uniswap_v3",
+      "chain": "base",
+      "type": "lp",
+      "lp_positions": [
+        {
+          "token_id": 812043,
+          "pool": "0x4c36388be6f416a29c8d8eee81c771ce6be14b18",
+          "token0": "ETH",
+          "token1": "USDC",
+          "fee_tier": 500,
+          "tick_lower": -202900,
+          "tick_upper": -196400,
+          "current_tick": -199820,
+          "in_range": true,
+          "value_usd": "5312.44",
+          "uncollected_fees_usd": "47.18"
+        },
+        {
+          "token_id": 934217,
+          "pool": "0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640",
+          "token0": "WBTC",
+          "token1": "USDC",
+          "fee_tier": 3000,
+          "tick_lower": -65000,
+          "tick_upper": -62000,
+          "current_tick": -60100,
+          "in_range": false,
+          "value_usd": "4562.78",
+          "uncollected_fees_usd": "183.52"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-05-28T09:15:00.000000"
+}
+```
+</ResponseExample>
+
+### Out-of-range LP positions
+
+When `in_range: false` on a Uniswap V3 position, the position has drifted outside its configured price range. It is no longer earning swap fees and is fully composed of one token. Use this signal to alert users to re-range or close stale positions.
+
+```python Python — filter out-of-range
+out_of_range = [
+    pos
+    for proto in data["positions"]
+    if proto["type"] == "lp"
+    for pos in proto.get("lp_positions", [])
+    if not pos["in_range"]
+]
+```

@@ -1,0 +1,77 @@
+---
+title: "Magic Link Login"
+description: "Passwordless authentication for the 0xRadar dashboard and API."
+---
+
+Magic links let you sign in to the 0xRadar dashboard without a password. An email containing a one-time link is sent to your inbox — clicking it authenticates you instantly.
+
+## How it works
+
+<Steps>
+  <Step title="Enter your email">
+    Go to [0xradar.app](https://0xradar.app) and enter your email address in the login form. Click **Send Magic Link**.
+  </Step>
+  <Step title="Check your inbox">
+    An email from `noreply@0xradar.app` arrives within seconds. Click **Sign In to 0xRadar** inside the email.
+  </Step>
+  <Step title="You're in">
+    The link opens the dashboard and logs you in automatically. Your API key is visible under **Settings → API Keys**.
+  </Step>
+</Steps>
+
+<Note>
+  The magic link is **single-use** and expires after **15 minutes**. If it expires, return to the login page and request a new one.
+</Note>
+
+## Rate limits
+
+To prevent abuse, magic link requests are rate-limited to **3 requests per 15 minutes** per email address. If you hit the limit, wait before requesting again.
+
+## Alternative: API key login
+
+If you have an existing API key and prefer direct access, you can authenticate programmatically without going through the dashboard:
+
+```bash
+# Step 1 — request a magic link
+curl -X POST https://api.0xradar.app/v1/auth/magic-link \
+  -H "Content-Type: application/json" \
+  -d '{"email": "you@example.com"}'
+
+# Step 2 — verify the token from the email link
+curl -X POST https://api.0xradar.app/v1/auth/verify \
+  -H "Content-Type: application/json" \
+  -d '{"token": "mlnk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}'
+```
+
+A successful `/v1/auth/verify` call returns a session token and your API key:
+
+```json
+{
+  "session_token": "sess_xxxxxxxxxxxxxxxx",
+  "api_key": "0xr_pro_YOUR_KEY_HERE",
+  "expires_at": "2026-05-28T09:30:00.000000"
+}
+```
+
+## Token properties
+
+| Property | Value |
+|----------|-------|
+| TTL | 15 minutes |
+| Uses | One-time (invalidated after first use) |
+| Rate limit | 3 requests / 15 min per email |
+| Delivery | Email via `noreply@0xradar.app` |
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="I didn't receive the email">
+    Check your spam or junk folder. The sender is `noreply@0xradar.app`. If it's not there after 2 minutes, try requesting a new link from the login page.
+  </Accordion>
+  <Accordion title="The link says 'already used' or 'expired'">
+    Magic links are single-use and expire after 15 minutes. Go back to the login page and request a fresh link.
+  </Accordion>
+  <Accordion title="I hit the rate limit">
+    Wait 15 minutes from the time of your first request, then try again.
+  </Accordion>
+</AccordionGroup>

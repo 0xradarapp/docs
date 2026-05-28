@@ -3,7 +3,7 @@ title: "Wallet Balances"
 api: "GET /v1/wallet/{address}/balances"
 ---
 
-Returns native + ERC-20 token balances for a single wallet address on one chain.
+Returns native token + fungible token balances for a single wallet address on one chain. Supports EVM chains and Solana.
 
 ### Auth
 
@@ -12,13 +12,13 @@ Optional `X-API-Key` header (free tier limited to 10 tokens per call).
 ### Path parameters
 
 <ParamField path="address" type="string" required>
-  EVM wallet address (42-character hex).
+  Wallet address. Use 42-character hex for EVM chains, or Base58 for Solana (32–44 characters).
 </ParamField>
 
 ### Query parameters
 
 <ParamField query="chain" type="string" required default="ethereum">
-  One of: `ethereum`, `arbitrum`, `base`, `optimism`, `polygon`, `bsc`, `hyperevm`
+  One of: `ethereum`, `arbitrum`, `base`, `optimism`, `polygon`, `bsc`, `hyperevm`, `solana`
 </ParamField>
 
 <ParamField query="include_prices" type="boolean" default="true">
@@ -31,31 +31,60 @@ Optional `X-API-Key` header (free tier limited to 10 tokens per call).
 
 ### Response fields
 
-<ResponseField name="address" type="string">Queried wallet address (lowercased)</ResponseField>
+<ResponseField name="address" type="string">Queried wallet address (lowercased for EVM; original Base58 for Solana)</ResponseField>
 <ResponseField name="chain" type="string">Chain identifier</ResponseField>
 <ResponseField name="native" type="object">Native token balance + price</ResponseField>
 <ResponseField name="tokens" type="object[]">
-  ERC-20 holdings with metadata + USD prices
+  ERC-20 / SPL token holdings with metadata + USD prices
 </ResponseField>
 <ResponseField name="total_value_usd" type="string">Sum of all USD values</ResponseField>
 
 <RequestExample>
 ```bash cURL
+# EVM
 curl -H "X-API-Key: YOUR_API_KEY" \
   "https://api.0xradar.app/v1/wallet/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/balances?chain=ethereum&max_tokens=5"
+
+# Solana
+curl -H "X-API-Key: YOUR_API_KEY" \
+  "https://api.0xradar.app/v1/wallet/vitalik.sol/balances?chain=solana"
 ```
 
 ```python Python
 import httpx
+
+# EVM
 url = "https://api.0xradar.app/v1/wallet/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/balances"
 params = {"chain": "ethereum", "max_tokens": 5}
 headers = {"X-API-Key": "YOUR_API_KEY"}
 print(httpx.get(url, params=params, headers=headers).json())
+
+# Solana — use Base58 address
+sol_url = "https://api.0xradar.app/v1/wallet/5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1/balances"
+print(httpx.get(sol_url, params={"chain": "solana"}, headers=headers).json())
+```
+
+```javascript JavaScript
+const headers = { "X-API-Key": "YOUR_API_KEY" };
+
+// EVM
+const evm = await fetch(
+  "https://api.0xradar.app/v1/wallet/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/balances?chain=ethereum&max_tokens=5",
+  { headers }
+);
+console.log(await evm.json());
+
+// Solana
+const sol = await fetch(
+  "https://api.0xradar.app/v1/wallet/5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1/balances?chain=solana",
+  { headers }
+);
+console.log(await sol.json());
 ```
 </RequestExample>
 
 <ResponseExample>
-```json 200
+```json 200 — Ethereum (EVM)
 {
   "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
   "chain": "ethereum",
@@ -67,7 +96,7 @@ print(httpx.get(url, params=params, headers=headers).json())
   },
   "tokens": [
     {
-      "contract": "0x...",
+      "contract": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
       "symbol": "USDC",
       "name": "USD Coin",
       "decimals": 6,
@@ -79,7 +108,48 @@ print(httpx.get(url, params=params, headers=headers).json())
   "token_count_total": 57,
   "token_count_shown": 5,
   "total_value_usd": "13206.32",
-  "timestamp": "2026-05-27T05:00:00.000000"
+  "timestamp": "2026-05-28T09:00:00.000000"
+}
+```
+
+```json 200 — Solana
+{
+  "address": "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1",
+  "chain": "solana",
+  "native": {
+    "symbol": "SOL",
+    "balance": "42.831504123",
+    "price_usd": "182.45",
+    "value_usd": "7814.66"
+  },
+  "tokens": [
+    {
+      "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "decimals": 6,
+      "balance": "3200.00",
+      "price_usd": "1.00",
+      "value_usd": "3200.00"
+    },
+    {
+      "mint": "So11111111111111111111111111111111111111112",
+      "symbol": "wSOL",
+      "name": "Wrapped SOL",
+      "decimals": 9,
+      "balance": "5.00",
+      "price_usd": "182.45",
+      "value_usd": "912.25"
+    }
+  ],
+  "token_count_total": 12,
+  "token_count_shown": 2,
+  "total_value_usd": "11926.91",
+  "timestamp": "2026-05-28T09:00:00.000000"
 }
 ```
 </ResponseExample>
+
+<Note>
+  Solana token balances are resolved via **Helius RPC**. This is transparent to you — the API response format is identical regardless of chain. SPL tokens use a `mint` field instead of `contract`.
+</Note>

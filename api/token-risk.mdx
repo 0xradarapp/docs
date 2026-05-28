@@ -1,0 +1,175 @@
+---
+title: "Token Risk"
+api: "GET /v1/token/{address}/risk"
+---
+
+Returns a composite risk score (0–100) for any ERC-20 token, aggregated from 10 on-chain and off-chain signals. Use this to screen tokens before display, trading, or sweep operations.
+
+<Note>
+  **Supported chains:** `ethereum`, `arbitrum`, `base`, `optimism`, `polygon`, `bsc`. HyperEVM and Solana are **not supported** by this endpoint.
+</Note>
+
+### Auth
+
+Optional `X-API-Key` header. Unauthenticated requests share a stricter rate limit.
+
+### Cache
+
+Results are cached for **1 hour** per `(address, chain)` pair. Newly deployed tokens may show incomplete data until signals stabilize.
+
+### Path parameters
+
+<ParamField path="address" type="string" required>
+  ERC-20 token contract address (42-character hex).
+</ParamField>
+
+### Query parameters
+
+<ParamField query="chain" type="string" required default="ethereum">
+  Chain the token is deployed on. One of: `ethereum`, `arbitrum`, `base`, `optimism`, `polygon`, `bsc`
+</ParamField>
+
+### Risk levels
+
+| Score range | Level | Meaning |
+|-------------|-------|---------|
+| 0 – 30 | `safe` | No significant red flags detected |
+| 31 – 60 | `caution` | One or more elevated signals — review before transacting |
+| 61 – 100 | `high` | Strong indicators of malicious or poorly structured token |
+
+### Signals
+
+<AccordionGroup>
+  <Accordion title="honeypot — Can tokens be sold?">
+    Simulates a buy and sell transaction pair. Detects if the sell is blocked by contract logic or reverts unconditionally.
+  </Accordion>
+  <Accordion title="verification — Is the contract source verified?">
+    Checks Etherscan/block explorer verification status. Unverified contracts receive a score penalty.
+  </Accordion>
+  <Accordion title="owner_privileges — Can the owner rug?">
+    Detects `mint`, `pause`, `blacklist`, and `upgradeable` functions that give the owner unilateral control over the token supply or transfers.
+  </Accordion>
+  <Accordion title="lp_lock — Is liquidity locked?">
+    Checks whether the primary liquidity pool LP tokens are locked in a time-lock contract. Unlocked liquidity = potential rug-pull risk.
+  </Accordion>
+  <Accordion title="holders — How distributed is ownership?">
+    Analyzes top-holder concentration. Score penalized when top 10 wallets hold > 80% of supply (excluding known burn/dead addresses).
+  </Accordion>
+  <Accordion title="transfer_tax — Are there hidden transfer fees?">
+    Detects buy/sell tax via simulation. Taxes above 10% are flagged; above 30% are a strong red flag.
+  </Accordion>
+  <Accordion title="liquidity — Is there enough liquidity?">
+    Measures total USD liquidity in the primary DEX pool. Low-liquidity tokens are more susceptible to price manipulation.
+  </Accordion>
+  <Accordion title="age — How old is the contract?">
+    New tokens (< 7 days) receive a time-based penalty. Risk normalizes after 30 days of on-chain history.
+  </Accordion>
+  <Accordion title="social — Does the project have verifiable presence?">
+    Checks for linked website, Twitter/X, and Telegram in on-chain metadata or known registries. No social presence increases score.
+  </Accordion>
+  <Accordion title="goplus_fallback — GoPlus Security cross-check">
+    Falls back to GoPlus Security API data when native signals are inconclusive. Weighted as a supporting signal, not primary.
+  </Accordion>
+</AccordionGroup>
+
+### Response fields
+
+<ResponseField name="token_address" type="string">Contract address (lowercased)</ResponseField>
+<ResponseField name="chain" type="string">Chain identifier</ResponseField>
+<ResponseField name="symbol" type="string">Token symbol</ResponseField>
+<ResponseField name="name" type="string">Token name</ResponseField>
+<ResponseField name="risk_score" type="integer">Composite score 0–100 (higher = riskier)</ResponseField>
+<ResponseField name="risk_level" type="string">`safe`, `caution`, or `high`</ResponseField>
+<ResponseField name="signals" type="object">
+  Per-signal breakdown.
+  <Expandable title="Signal object">
+    <ResponseField name="score" type="integer">Signal contribution (0–100)</ResponseField>
+    <ResponseField name="weight" type="number">Weight applied in composite calculation</ResponseField>
+    <ResponseField name="label" type="string">Human-readable finding</ResponseField>
+    <ResponseField name="passed" type="boolean">Whether the signal raised a concern</ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="cached" type="boolean">Whether this result was served from the 1-hour cache</ResponseField>
+<ResponseField name="timestamp" type="string">ISO 8601 timestamp</ResponseField>
+
+<RequestExample>
+```bash cURL
+# USDC — safe token
+curl -H "X-API-Key: YOUR_API_KEY" \
+  "https://api.0xradar.app/v1/token/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/risk?chain=ethereum"
+```
+
+```python Python
+import httpx
+
+# USDC
+url = "https://api.0xradar.app/v1/token/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/risk"
+params = {"chain": "ethereum"}
+headers = {"X-API-Key": "YOUR_API_KEY"}
+
+data = httpx.get(url, params=params, headers=headers).json()
+print(f"{data['symbol']}: {data['risk_level']} ({data['risk_score']})")
+```
+
+```javascript JavaScript
+const tokenAddress = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
+const res = await fetch(
+  `https://api.0xradar.app/v1/token/${tokenAddress}/risk?chain=ethereum`,
+  { headers: { "X-API-Key": "YOUR_API_KEY" } }
+);
+const data = await res.json();
+console.log(`${data.symbol}: ${data.risk_level} (${data.risk_score})`);
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 — USDC (safe)
+{
+  "token_address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+  "chain": "ethereum",
+  "symbol": "USDC",
+  "name": "USD Coin",
+  "risk_score": 4,
+  "risk_level": "safe",
+  "signals": {
+    "honeypot":        { "score": 0,  "weight": 0.25, "label": "No honeypot detected",        "passed": true },
+    "verification":    { "score": 0,  "weight": 0.15, "label": "Contract source verified",    "passed": true },
+    "owner_privileges":{ "score": 0,  "weight": 0.15, "label": "No owner rug functions",      "passed": true },
+    "lp_lock":         { "score": 0,  "weight": 0.10, "label": "Liquidity locked",             "passed": true },
+    "holders":         { "score": 5,  "weight": 0.10, "label": "Well distributed supply",     "passed": true },
+    "transfer_tax":    { "score": 0,  "weight": 0.10, "label": "No transfer tax",              "passed": true },
+    "liquidity":       { "score": 0,  "weight": 0.05, "label": "Deep liquidity pool",          "passed": true },
+    "age":             { "score": 0,  "weight": 0.05, "label": "Established contract (>1 yr)", "passed": true },
+    "social":          { "score": 0,  "weight": 0.03, "label": "Active social presence",       "passed": true },
+    "goplus_fallback": { "score": 0,  "weight": 0.02, "label": "GoPlus: no issues",            "passed": true }
+  },
+  "cached": true,
+  "timestamp": "2026-05-28T09:00:00.000000"
+}
+```
+
+```json 200 — High-risk scam token
+{
+  "token_address": "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+  "chain": "ethereum",
+  "symbol": "SAFEMOON2",
+  "name": "SafeMoon2 Token",
+  "risk_score": 88,
+  "risk_level": "high",
+  "signals": {
+    "honeypot":        { "score": 100, "weight": 0.25, "label": "Sell transactions revert",       "passed": false },
+    "verification":    { "score": 100, "weight": 0.15, "label": "Contract not verified",           "passed": false },
+    "owner_privileges":{ "score": 80,  "weight": 0.15, "label": "Owner can mint and blacklist",    "passed": false },
+    "lp_lock":         { "score": 100, "weight": 0.10, "label": "Liquidity unlocked",              "passed": false },
+    "holders":         { "score": 90,  "weight": 0.10, "label": "Top 3 wallets hold 92% supply",  "passed": false },
+    "transfer_tax":    { "score": 70,  "weight": 0.10, "label": "25% sell tax detected",           "passed": false },
+    "liquidity":       { "score": 60,  "weight": 0.05, "label": "Thin pool ($4,200)",              "passed": false },
+    "age":             { "score": 80,  "weight": 0.05, "label": "Contract deployed 2 days ago",    "passed": false },
+    "social":          { "score": 100, "weight": 0.03, "label": "No verified social presence",     "passed": false },
+    "goplus_fallback": { "score": 100, "weight": 0.02, "label": "GoPlus: honeypot + rug flags",   "passed": false }
+  },
+  "cached": false,
+  "timestamp": "2026-05-28T09:15:42.000000"
+}
+```
+</ResponseExample>

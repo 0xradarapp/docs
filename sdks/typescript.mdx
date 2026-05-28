@@ -4,45 +4,252 @@ title: "TypeScript / JavaScript SDK"
 
 # TypeScript SDK
 
-A typed TypeScript SDK for Node.js and browsers is in development.
+A typed TypeScript SDK for Node.js and browsers is in development. Until it ships, the examples below cover every endpoint using the native `fetch` API — fully typed with inline interfaces.
 
-## Installation (coming soon)
-
-```bash
-npm install @0xradar/sdk
-```
-
-## Planned interface
+## Setup
 
 ```typescript
-import { RadarClient } from "@0xradar/sdk";
+const BASE_URL = "https://api.0xradar.app";
+const API_KEY  = "0xr_pro_YOUR_KEY_HERE"; // or process.env.RADAR_API_KEY
 
-const client = new RadarClient({ apiKey: "rk_live_xxx" });
-
-// Single chain
-const balances = await client.balances({
-  address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-  chain: "ethereum",
-});
-
-// Multi-chain portfolio
-const portfolio = await client.portfolio({
-  address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-  chains: ["ethereum", "base"],
-});
-
-// Sweep quote
-const quote = await client.sweepQuote({
-  address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-  chains: ["eth", "base"],
-  targetChain: "base",
-});
+const headers = { "X-API-Key": API_KEY };
 ```
 
-## Current workaround
+## Endpoints
 
-Until the SDK is published, use `fetch` directly as shown in the [API Reference](/api/wallet-balances).
+### getBalances — single-chain token balances
+
+```typescript
+interface NativeBalance {
+  symbol: string;
+  balance: string;
+  price_usd: string;
+  value_usd: string;
+}
+
+interface TokenBalance {
+  contract?: string; // EVM
+  mint?: string;     // Solana SPL
+  symbol: string;
+  name: string;
+  decimals: number;
+  balance: string;
+  price_usd: string;
+  value_usd: string;
+}
+
+interface BalancesResponse {
+  address: string;
+  chain: string;
+  native: NativeBalance;
+  tokens: TokenBalance[];
+  token_count_total: number;
+  token_count_shown: number;
+  total_value_usd: string;
+  timestamp: string;
+}
+
+async function getBalances(
+  address: string,
+  chain = "ethereum",
+  maxTokens = 20
+): Promise<BalancesResponse> {
+  const url = new URL(`${BASE_URL}/v1/wallet/${address}/balances`);
+  url.searchParams.set("chain", chain);
+  url.searchParams.set("max_tokens", String(maxTokens));
+
+  const res = await fetch(url.toString(), { headers });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+// EVM
+const evmBalances = await getBalances("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
+console.log(evmBalances.total_value_usd);
+
+// Solana — pass Base58 address
+const solBalances = await getBalances(
+  "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1",
+  "solana"
+);
+console.log(solBalances.native.symbol, solBalances.native.balance);
+```
+
+### getPortfolio — multi-chain aggregation
+
+```typescript
+interface PortfolioResponse {
+  address: string;
+  chains_requested: string[];
+  chains_with_value: number;
+  total_value_usd: string;
+  total_tokens: number;
+  by_chain: Record<string, BalancesResponse>;
+  errors: Array<{ chain: string; error: string }>;
+  timestamp: string;
+}
+
+async function getPortfolio(
+  address: string,
+  chains?: string[],
+  maxTokensPerChain = 20
+): Promise<PortfolioResponse> {
+  const url = new URL(`${BASE_URL}/v1/wallet/${address}/portfolio`);
+  if (chains?.length) url.searchParams.set("chains", chains.join(","));
+  url.searchParams.set("max_tokens_per_chain", String(maxTokensPerChain));
+
+  const res = await fetch(url.toString(), { headers });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+const portfolio = await getPortfolio(
+  "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+  ["ethereum", "base", "arbitrum"]
+);
+console.log(`Total: $${portfolio.total_value_usd}`);
+```
+
+### getPositions — DeFi lending + LP positions
+
+```typescript
+type ProtocolType = "aave_v3" | "hyperlend" | "sentiment_v2" | "uniswap_v3" | "compound_v3";
+
+interface LpPosition {
+  token_id: number;
+  pool: string;
+  token0: string;
+  token1: string;
+  fee_tier: number;
+  tick_lower: number;
+  tick_upper: number;
+  current_tick: number;
+  in_range: boolean;
+  value_usd: string;
+  uncollected_fees_usd: string;
+}
+
+interface ProtocolPosition {
+  protocol: string;
+  chain: string;
+  type: "lending" | "lp";
+  supplied?: Array<{ symbol: string; amount: string; value_usd: string; apy: string }>;
+  borrowed?: Array<{ symbol: string; amount: string; value_usd: string; apy: string }>;
+  health_factor?: string | null;
+  lp_positions?: LpPosition[];
+}
+
+interface PositionsResponse {
+  address: string;
+  protocols_requested: string[];
+  total_supplied_usd: string;
+  total_borrowed_usd: string;
+  total_lp_value_usd: string;
+  positions: ProtocolPosition[];
+  timestamp: string;
+}
+
+async function getPositions(
+  address: string,
+  protocols?: ProtocolType[]
+): Promise<PositionsResponse> {
+  const url = new URL(`${BASE_URL}/v1/positions/${address}`);
+  if (protocols?.length) url.searchParams.set("protocols", protocols.join(","));
+
+  const res = await fetch(url.toString(), { headers });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+const positions = await getPositions(
+  "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+  ["aave_v3", "uniswap_v3"]
+);
+
+// Find out-of-range LP positions
+const outOfRange = positions.positions
+  .filter((p) => p.type === "lp")
+  .flatMap((p) => p.lp_positions ?? [])
+  .filter((lp) => !lp.in_range);
+
+console.log(`Out-of-range positions: ${outOfRange.length}`);
+```
+
+### getTokenRisk — token security screening
+
+```typescript
+interface RiskSignal {
+  score: number;
+  weight: number;
+  label: string;
+  passed: boolean;
+}
+
+interface TokenRiskResponse {
+  token_address: string;
+  chain: string;
+  symbol: string;
+  name: string;
+  risk_score: number;
+  risk_level: "safe" | "caution" | "high";
+  signals: Record<string, RiskSignal>;
+  cached: boolean;
+  timestamp: string;
+}
+
+async function getTokenRisk(
+  tokenAddress: string,
+  chain = "ethereum"
+): Promise<TokenRiskResponse> {
+  const url = new URL(`${BASE_URL}/v1/token/${tokenAddress}/risk`);
+  url.searchParams.set("chain", chain);
+
+  const res = await fetch(url.toString(), { headers });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+const risk = await getTokenRisk(
+  "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+  "ethereum"
+);
+console.log(`${risk.symbol}: ${risk.risk_level} (${risk.risk_score}/100)`);
+
+const failedSignals = Object.entries(risk.signals)
+  .filter(([, sig]) => !sig.passed)
+  .map(([name]) => name);
+console.log("Risk flags:", failedSignals);
+```
+
+### getSolanaBalance — Solana convenience wrapper
+
+```typescript
+async function getSolanaBalance(solAddress: string, maxTokens = 20): Promise<BalancesResponse> {
+  return getBalances(solAddress, "solana", maxTokens);
+}
+
+const sol = await getSolanaBalance("5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1");
+console.log(`SOL: ${sol.native.balance}`);
+```
+
+## Parallel calls
+
+```typescript
+const address = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
+const usdcAddress = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
+
+// Fan out all calls simultaneously
+const [portfolio, positions, usdcRisk] = await Promise.all([
+  getPortfolio(address, ["ethereum", "base"]),
+  getPositions(address, ["aave_v3", "uniswap_v3"]),
+  getTokenRisk(usdcAddress, "ethereum"),
+]);
+
+console.log("Portfolio:", portfolio.total_value_usd);
+console.log("Supplied:", positions.total_supplied_usd);
+console.log("USDC risk:", usdcRisk.risk_level);
+```
 
 <Info>
-  Star [0xradarapp/sdk-typescript](https://github.com/0xradarapp/sdk-typescript) on GitHub to get notified on release.
+  Star [0xradarapp/sdk-typescript](https://github.com/0xradarapp/sdk-typescript) on GitHub to get notified when the official SDK ships.
 </Info>

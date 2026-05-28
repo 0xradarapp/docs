@@ -4,45 +4,184 @@ title: "Python SDK"
 
 # Python SDK
 
-A native Python SDK for 0xRadar is in development.
+A native Python SDK for 0xRadar is in development. Until it publishes, use `httpx` (or `requests`) directly — the examples below cover every available endpoint with both sync and async patterns.
 
-## Installation (coming soon)
+## Installation
 
 ```bash
-pip install zeroxradar
+pip install httpx
 ```
 
-## Planned interface
+## Setup
 
 ```python
-from zeroxradar import Client
+import httpx
 
-client = Client(api_key="rk_live_xxx")
+BASE_URL = "https://api.0xradar.app"
+API_KEY  = "0xr_pro_YOUR_KEY_HERE"   # or read from env
 
-# Single chain
-balances = client.balances(
-    address="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-    chain="ethereum"
-)
-
-# Multi-chain portfolio
-portfolio = client.portfolio(
-    address="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-    chains=["ethereum", "base"]
-)
-
-# Sweep quote
-quote = client.sweep_quote(
-    address="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-    chains=["eth", "base"],
-    target_chain="base"
-)
+HEADERS = {"X-API-Key": API_KEY}
 ```
 
-## Current workaround
+## Endpoints
 
-Until the SDK is published, use `httpx` directly as shown in the [API Reference](/api/wallet-balances).
+### get_balances — single-chain token balances
+
+```python
+def get_balances(address: str, chain: str = "ethereum", max_tokens: int = 20) -> dict:
+    """EVM and Solana. Use Base58 address for chain='solana'."""
+    return httpx.get(
+        f"{BASE_URL}/v1/wallet/{address}/balances",
+        params={"chain": chain, "max_tokens": max_tokens},
+        headers=HEADERS,
+    ).json()
+
+# EVM
+balances = get_balances("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", chain="ethereum")
+print(balances["total_value_usd"])
+
+# Solana
+sol_balances = get_balances("5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1", chain="solana")
+print(sol_balances["native"]["symbol"], sol_balances["native"]["balance"])
+```
+
+### get_portfolio — multi-chain aggregation
+
+```python
+def get_portfolio(address: str, chains: list[str] | None = None, max_tokens_per_chain: int = 20) -> dict:
+    params: dict = {"max_tokens_per_chain": max_tokens_per_chain}
+    if chains:
+        params["chains"] = ",".join(chains)
+    return httpx.get(
+        f"{BASE_URL}/v1/wallet/{address}/portfolio",
+        params=params,
+        headers=HEADERS,
+    ).json()
+
+portfolio = get_portfolio(
+    "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+    chains=["ethereum", "base", "arbitrum"],
+)
+print(portfolio["total_value_usd"])
+```
+
+### get_positions — DeFi lending + LP positions
+
+```python
+def get_positions(address: str, protocols: list[str] | None = None) -> dict:
+    """
+    Supported protocols: aave_v3, hyperlend, sentiment_v2, uniswap_v3, compound_v3
+    EVM-only. Heavy endpoint — Pro tier recommended for production use.
+    """
+    params: dict = {}
+    if protocols:
+        params["protocols"] = ",".join(protocols)
+    return httpx.get(
+        f"{BASE_URL}/v1/positions/{address}",
+        params=params,
+        headers=HEADERS,
+    ).json()
+
+positions = get_positions(
+    "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+    protocols=["aave_v3", "uniswap_v3"],
+)
+
+# Check health factor
+for pos in positions["positions"]:
+    if pos["type"] == "lending" and pos.get("health_factor"):
+        print(f"{pos['protocol']} on {pos['chain']}: HF = {pos['health_factor']}")
+
+# Find out-of-range LP positions
+out_of_range = [
+    lp
+    for pos in positions["positions"]
+    if pos["type"] == "lp"
+    for lp in pos.get("lp_positions", [])
+    if not lp["in_range"]
+]
+print(f"Out-of-range LP positions: {len(out_of_range)}")
+```
+
+### get_token_risk — token security screening
+
+```python
+def get_token_risk(token_address: str, chain: str = "ethereum") -> dict:
+    """
+    Supported chains: ethereum, arbitrum, base, optimism, polygon, bsc
+    Results are cached for 1 hour per (address, chain) pair.
+    """
+    return httpx.get(
+        f"{BASE_URL}/v1/token/{token_address}/risk",
+        params={"chain": chain},
+        headers=HEADERS,
+    ).json()
+
+risk = get_token_risk("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", chain="ethereum")
+print(f"{risk['symbol']}: {risk['risk_level']} ({risk['risk_score']}/100)")
+
+# Filter failed signals
+failed = [name for name, sig in risk["signals"].items() if not sig["passed"]]
+print("Risk flags:", failed)
+```
+
+### get_solana_balance — Solana convenience wrapper
+
+```python
+def get_solana_balance(sol_address: str, max_tokens: int = 20) -> dict:
+    """Thin wrapper around get_balances with chain='solana'."""
+    return get_balances(sol_address, chain="solana", max_tokens=max_tokens)
+
+sol = get_solana_balance("5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1")
+print(f"SOL balance: {sol['native']['balance']}")
+```
+
+## Async variants
+
+All endpoints work identically with `httpx.AsyncClient`:
+
+```python
+import asyncio
+import httpx
+
+BASE_URL = "https://api.0xradar.app"
+HEADERS  = {"X-API-Key": "0xr_pro_YOUR_KEY_HERE"}
+
+async def get_positions_async(address: str, protocols: list[str] | None = None) -> dict:
+    params: dict = {}
+    if protocols:
+        params["protocols"] = ",".join(protocols)
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(
+            f"{BASE_URL}/v1/positions/{address}",
+            params=params,
+            headers=HEADERS,
+        )
+        return resp.json()
+
+async def main():
+    address = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+
+    # Fan out calls in parallel
+    portfolio, positions, risk = await asyncio.gather(
+        asyncio.to_thread(lambda: httpx.get(
+            f"{BASE_URL}/v1/wallet/{address}/portfolio", headers=HEADERS
+        ).json()),
+        get_positions_async(address, protocols=["aave_v3", "uniswap_v3"]),
+        asyncio.to_thread(lambda: httpx.get(
+            f"{BASE_URL}/v1/token/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/risk",
+            params={"chain": "ethereum"},
+            headers=HEADERS,
+        ).json()),
+    )
+
+    print("Portfolio:", portfolio["total_value_usd"])
+    print("Positions:", positions["total_supplied_usd"])
+    print("USDC risk:", risk["risk_level"])
+
+asyncio.run(main())
+```
 
 <Info>
-  Star [0xradarapp/sdk-python](https://github.com/0xradarapp/sdk-python) on GitHub to get notified on release.
+  Star [0xradarapp/sdk-python](https://github.com/0xradarapp/sdk-python) on GitHub to get notified when the official SDK ships.
 </Info>
