@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "0xRadar API",
-    "description": "Multi-chain wallet intelligence platform — portfolio aggregation, DeFi position monitoring, sweep cost calculation, and token risk scoring across 7+ EVM chains.\n\n**Features:**\n- Real-time multi-chain balance aggregation (parallel `asyncio` fetch)\n- Token metadata enrichment (symbol, name, decimals, logo)\n- CoinGecko USD price integration\n- Sweep consolidation cost calculator (unique differentiator vs DeBank/Zerion)\n- Token risk scoring\n\n**Authentication:** Optional `X-API-Key` header for higher rate limits. Pro tier required for admin endpoints.",
-    "version": "0.3.0",
+    "description": "Multi-chain wallet intelligence platform — portfolio aggregation, DeFi position monitoring, sweep cost calculation, and token risk scoring across 8 EVM chains + Solana.\n\n**Features:**\n- Real-time multi-chain balance aggregation (parallel `asyncio` fetch)\n- Token metadata enrichment (symbol, name, decimals, logo)\n- CoinGecko USD price integration\n- Sweep consolidation cost calculator (unique differentiator vs DeBank/Zerion)\n- DeFi position aggregation (Aave v3, HyperLend, Sentiment v2, Uniswap v3, Compound v3)\n- Token risk scoring with GoPlus Security integration\n- Magic link authentication (anti-enumeration)\n- API key management, usage stats, rate limit monitoring\n- Crypto payment checkout (NOWPayments) — unauthenticated or authenticated\n- Solana balance support via Helius RPC\n\n**Authentication:** Optional `X-API-Key` header for higher rate limits. Pro tier required for admin endpoints. Magic link auth for dashboard access.",
+    "version": "0.4.0",
     "contact": {
       "name": "0xRadar Team",
       "email": "volkanglm@gmail.com",
@@ -34,14 +34,44 @@
       "x-displayName": "System"
     },
     {
+      "name": "Auth",
+      "description": "Magic link authentication — email-based passwordless login",
+      "x-displayName": "Auth"
+    },
+    {
+      "name": "User",
+      "description": "Authenticated user endpoints — profile, API keys, usage stats, subscription, checkout",
+      "x-displayName": "User"
+    },
+    {
       "name": "Wallet",
       "description": "Wallet balances and portfolio across chains",
       "x-displayName": "Wallet"
     },
     {
+      "name": "Positions",
+      "description": "DeFi position aggregation across lending and LP protocols",
+      "x-displayName": "Positions"
+    },
+    {
+      "name": "Risk",
+      "description": "Token risk scoring — security analysis of ERC-20 tokens",
+      "x-displayName": "Risk"
+    },
+    {
       "name": "Sweep",
       "description": "Sweep consolidation quote — calculate cost to consolidate dust/wallet assets to a single chain",
       "x-displayName": "Sweep"
+    },
+    {
+      "name": "Payments",
+      "description": "Unauthenticated crypto checkout — purchase API access via NOWPayments",
+      "x-displayName": "Payments"
+    },
+    {
+      "name": "Webhooks",
+      "description": "Payment provider webhooks — NOWPayments IPN",
+      "x-displayName": "Webhooks"
     },
     {
       "name": "Admin",
@@ -53,7 +83,9 @@
   "paths": {
     "/": {
       "get": {
-        "tags": ["System"],
+        "tags": [
+          "System"
+        ],
         "summary": "Service info",
         "description": "Returns basic service metadata and available endpoints. No authentication required.",
         "operationId": "getServiceInfo",
@@ -71,13 +103,16 @@
                     "summary": "Production response",
                     "value": {
                       "app": "0xRadar API",
-                      "version": "0.3.0",
+                      "version": "0.4.0",
                       "docs": "/docs",
                       "endpoints": {
                         "health": "/v1/health",
                         "wallet_balances": "/v1/wallet/{address}/balances?chain={chain}",
                         "wallet_portfolio": "/v1/wallet/{address}/portfolio",
-                        "sweep_quote": "/v1/sweep-quote/{address}"
+                        "sweep_quote": "/v1/sweep-quote/{address}",
+                        "positions": "/v1/positions/{address}",
+                        "token_risk": "/v1/token/{address}/risk",
+                        "crypto_checkout": "/v1/checkout/crypto"
                       }
                     }
                   }
@@ -90,9 +125,11 @@
     },
     "/v1/health": {
       "get": {
-        "tags": ["System"],
+        "tags": [
+          "System"
+        ],
         "summary": "Health check",
-        "description": "Returns API health status, version, supported chains, and dependency status. Use for monitoring and uptime checks.",
+        "description": "Returns API health status, version, supported chains (including Solana), and dependency status. Use for monitoring and uptime checks.",
         "operationId": "healthCheck",
         "security": [],
         "responses": {
@@ -120,12 +157,18 @@
                     "value": {
                       "status": "ok",
                       "service": "0xradar-api",
-                      "version": "0.3.0",
+                      "version": "0.4.0",
                       "supported_chains": [
-                        "ethereum", "arbitrum", "base",
-                        "optimism", "polygon", "hyperevm", "bsc"
+                        "ethereum",
+                        "arbitrum",
+                        "base",
+                        "optimism",
+                        "polygon",
+                        "hyperevm",
+                        "bsc",
+                        "solana"
                       ],
-                      "chain_count": 7,
+                      "chain_count": 8,
                       "dependencies": {
                         "redis": "ok"
                       },
@@ -144,9 +187,11 @@
     },
     "/v1/chains": {
       "get": {
-        "tags": ["System"],
+        "tags": [
+          "System"
+        ],
         "summary": "List supported chains",
-        "description": "Returns metadata for all 7 supported EVM chains including chain IDs, explorers, and L2 status.",
+        "description": "Returns metadata for all 8 supported chains (7 EVM + Solana) including chain IDs, explorers, and L2 status.",
         "operationId": "listChains",
         "security": [],
         "responses": {
@@ -170,7 +215,7 @@
                 },
                 "examples": {
                   "allChains": {
-                    "summary": "All 7 supported chains",
+                    "summary": "All 8 supported chains",
                     "value": {
                       "chains": [
                         {
@@ -228,9 +273,17 @@
                           "chain_id": 56,
                           "explorer": "https://bscscan.com",
                           "is_l2": false
+                        },
+                        {
+                          "id": "solana",
+                          "name": "Solana",
+                          "native_symbol": "SOL",
+                          "chain_id": 900,
+                          "explorer": "https://solscan.io",
+                          "is_l2": false
                         }
                       ],
-                      "count": 7
+                      "count": 8
                     }
                   }
                 }
@@ -245,13 +298,17 @@
     },
     "/v1/wallet/{address}/balances": {
       "get": {
-        "tags": ["Wallet"],
+        "tags": [
+          "Wallet"
+        ],
         "summary": "Get wallet balances on a single chain",
-        "description": "Fetches native + ERC-20 token balances for an EVM address on a specific chain. Includes USD values when `include_prices=true`. Results are cached for 5 minutes.\n\n**Free tier:** max 10 tokens returned. **Dev/Pro:** up to 200.",
+        "description": "Fetches native + ERC-20 token balances for an address on a specific chain. Includes USD values when `include_prices=true`. Results are cached for 5 minutes.\n\n**EVM chains:** Uses standard RPC (balanceOf + native).\n**Solana (`chain=solana`):** Uses Helius RPC and returns a Solana-native schema (SPL tokens instead of ERC-20). Solana addresses are base58-encoded (e.g., `7EcD...`).\n\n**Free tier:** max 10 tokens returned. **Dev/Pro:** up to 200.",
         "operationId": "getWalletBalances",
         "security": [
           {},
-          { "ApiKeyAuth": [] }
+          {
+            "ApiKeyAuth": []
+          }
         ],
         "parameters": [
           {
@@ -272,7 +329,16 @@
             "description": "Chain ID to query",
             "schema": {
               "type": "string",
-              "enum": ["ethereum", "arbitrum", "base", "optimism", "polygon", "hyperevm", "bsc"],
+              "enum": [
+                "ethereum",
+                "arbitrum",
+                "base",
+                "optimism",
+                "polygon",
+                "hyperevm",
+                "bsc",
+                "solana"
+              ],
               "default": "ethereum",
               "example": "ethereum"
             }
@@ -398,13 +464,17 @@
     },
     "/v1/wallet/{address}/portfolio": {
       "get": {
-        "tags": ["Wallet"],
+        "tags": [
+          "Wallet"
+        ],
         "summary": "Get multi-chain portfolio",
-        "description": "Fetches wallet balances across multiple chains in parallel. Returns aggregated totals and per-chain breakdowns. Results are cached for 5 minutes.\n\n**Free tier:** max 3 chains per request. **Dev/Pro:** up to 20 chains.",
+        "description": "Fetches wallet balances across multiple chains in parallel. Returns aggregated totals and per-chain breakdowns. Results are cached for 5 minutes.\n\n**Free tier:** max 3 chains per request. **Dev/Pro:** up to 20 chains. Supports all EVM chains and Solana (via Helius RPC).",
         "operationId": "getWalletPortfolio",
         "security": [
           {},
-          { "ApiKeyAuth": [] }
+          {
+            "ApiKeyAuth": []
+          }
         ],
         "parameters": [
           {
@@ -477,7 +547,10 @@
                     "summary": "Vitalik across Ethereum + Base",
                     "value": {
                       "address": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-                      "chains_requested": ["ethereum", "base"],
+                      "chains_requested": [
+                        "ethereum",
+                        "base"
+                      ],
                       "chains_with_value": 2,
                       "total_value_usd": "13250.45",
                       "total_tokens": 8,
@@ -573,13 +646,17 @@
     },
     "/v1/sweep-quote/{address}": {
       "get": {
-        "tags": ["Sweep"],
+        "tags": [
+          "Sweep"
+        ],
         "summary": "Calculate sweep consolidation cost",
         "description": "Estimates the gas cost to sweep/consolidate all assets from a wallet across specified chains to a target chain. Analyzes each chain's token count, estimates gas costs, and provides a profitability recommendation.\n\n**Unique differentiator:** DeBank, Zerion, and other portfolio trackers do not offer sweep cost calculation.",
         "operationId": "getSweepQuote",
         "security": [
           {},
-          { "ApiKeyAuth": [] }
+          {
+            "ApiKeyAuth": []
+          }
         ],
         "parameters": [
           {
@@ -610,7 +687,16 @@
             "description": "Chain to consolidate assets to",
             "schema": {
               "type": "string",
-              "enum": ["ethereum", "arbitrum", "base", "optimism", "polygon", "hyperevm", "bsc"],
+              "enum": [
+                "ethereum",
+                "arbitrum",
+                "base",
+                "optimism",
+                "polygon",
+                "hyperevm",
+                "bsc",
+                "solana"
+              ],
               "default": "base",
               "example": "base"
             }
@@ -640,7 +726,10 @@
                     "summary": "Sweep is profitable (vitalik.eth to Base)",
                     "value": {
                       "address": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-                      "chains_evaluated": ["ethereum", "base"],
+                      "chains_evaluated": [
+                        "ethereum",
+                        "base"
+                      ],
                       "target_chain": "base",
                       "by_chain": [
                         {
@@ -709,12 +798,16 @@
     },
     "/v1/admin/keys": {
       "get": {
-        "tags": ["Admin"],
+        "tags": [
+          "Admin"
+        ],
         "summary": "List API keys (admin only)",
-        "description": "Returns a list of registered API keys with their hash prefixes and metadata. **Pro tier API key required.** For security, full key values are never exposed — only SHA-256 hash prefixes.",
+        "description": "Returns a list of registered API keys with their hash prefixes and metadata. **Pro tier API key required.** For security, full key values are never exposed — only SHA-256 hash prefixes.\n\nNote: The 0xRadar platform now supports Solana balances via Helius RPC in addition to 7 EVM chains.",
         "operationId": "adminListKeys",
         "security": [
-          { "ApiKeyAuth": [] }
+          {
+            "ApiKeyAuth": []
+          }
         ],
         "responses": {
           "200": {
@@ -796,6 +889,1589 @@
           }
         }
       }
+    },
+    "/v1/auth/magic-link": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Send magic link email",
+        "description": "Sends a one-time magic link to the provided email address. The link contains a short-lived JWT token for passwordless authentication. **Always returns 200** even for unknown emails — this prevents email enumeration attacks.\n\nToken expiry: 15 minutes. User accounts are created on first successful login (auto-provisioning).",
+        "operationId": "sendMagicLink",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MagicLinkRequest"
+              },
+              "examples": {
+                "validEmail": {
+                  "summary": "Request a magic link",
+                  "value": {
+                    "email": "vitalik@ethereum.org"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Magic link sent (or silently ignored for unknown emails — anti-enumeration)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MagicLinkResponse"
+                },
+                "examples": {
+                  "sent": {
+                    "summary": "Always returns sent: true",
+                    "value": {
+                      "sent": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid email format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalidEmail": {
+                    "summary": "Malformed email",
+                    "value": {
+                      "detail": "Invalid email address",
+                      "code": "invalid_email"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/auth/verify": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Verify magic link token",
+        "description": "Validates a magic link token and returns a session JWT. The token is **one-time use** — it is deleted after successful verification. If the email doesn't have an account yet, one is created automatically.\n\nUse the returned `token` as `X-API-Key` header for authenticated endpoints.",
+        "operationId": "verifyMagicLink",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyRequest"
+              },
+              "examples": {
+                "validToken": {
+                  "summary": "Verify a token from the magic link",
+                  "value": {
+                    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2aXRhbGlrQGV0aGVyZXVtLm9yZyIsImV4cCI6MTc0ODMzMjAwMH0.abc123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token verified, session JWT returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyResponse"
+                },
+                "examples": {
+                  "success": {
+                    "summary": "Successful verification — new session token",
+                    "value": {
+                      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2aXRhbGlrQGV0aGVyZXVtLm9yZyIsInRpZXIiOiJmcmVlIiwiZXhwIjoxNzQ4MzM1NjAwfQ.xyz789",
+                      "user": {
+                        "id": "usr_a1b2c3d4",
+                        "email": "vitalik@ethereum.org",
+                        "tier": "free"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "expired": {
+                    "summary": "Token expired",
+                    "value": {
+                      "detail": "Token expired or already used",
+                      "code": "token_invalid"
+                    }
+                  },
+                  "invalid": {
+                    "summary": "Token invalid",
+                    "value": {
+                      "detail": "Invalid magic link token",
+                      "code": "token_invalid"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/me": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Current user info",
+        "description": "Returns the authenticated user's profile including tier, email, and API key expiry.",
+        "operationId": "getCurrentUser",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current user profile",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserMeResponse"
+                },
+                "examples": {
+                  "proUser": {
+                    "summary": "Pro tier user",
+                    "value": {
+                      "user_id": "usr_a1b2c3d4",
+                      "email": "vitalik@ethereum.org",
+                      "tier": "pro",
+                      "key_prefix": "0xr_pro_",
+                      "expires_at": "2027-05-27T06:38:15Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "missingKey": {
+                    "summary": "No API key provided",
+                    "value": {
+                      "detail": "Missing X-API-Key header or api_key query param",
+                      "code": "missing_api_key"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/me/api-keys": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "List user's API keys",
+        "description": "Returns all API keys associated with the authenticated user. Full key values are never exposed — only prefixes and metadata.",
+        "operationId": "listApiKeys",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of API keys",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeysListResponse"
+                },
+                "examples": {
+                  "twoKeys": {
+                    "summary": "User with two API keys",
+                    "value": {
+                      "keys": [
+                        {
+                          "id": "key_abc123",
+                          "key_prefix": "0xr_free_",
+                          "tier": "free",
+                          "created_at": "2026-05-20T10:00:00Z",
+                          "last_used_at": "2026-05-27T06:00:00Z",
+                          "expires_at": null
+                        },
+                        {
+                          "id": "key_def456",
+                          "key_prefix": "0xr_pro_",
+                          "tier": "pro",
+                          "created_at": "2026-05-25T14:30:00Z",
+                          "last_used_at": "2026-05-27T06:30:00Z",
+                          "expires_at": "2027-05-25T14:30:00Z"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "missingKey": {
+                    "summary": "No API key provided",
+                    "value": {
+                      "detail": "Missing X-API-Key header or api_key query param",
+                      "code": "missing_api_key"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Create new API key",
+        "description": "Generates a new API key for the authenticated user. **The plaintext key is returned only once** — store it immediately. The `key.key_prefix` is stored server-side for display; the full key value cannot be retrieved later.\n\nIf `tier` is omitted, the key inherits the user's current tier.",
+        "operationId": "createApiKey",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Optional label for this key",
+                    "example": "My trading bot"
+                  },
+                  "tier": {
+                    "type": "string",
+                    "enum": [
+                      "free",
+                      "dev",
+                      "pro"
+                    ],
+                    "description": "Tier override (default: user's current tier)",
+                    "example": "pro"
+                  }
+                }
+              },
+              "examples": {
+                "namedKey": {
+                  "summary": "Create a named API key",
+                  "value": {
+                    "name": "My trading bot"
+                  }
+                },
+                "proKey": {
+                  "summary": "Create a pro tier key",
+                  "value": {
+                    "name": "Production API key",
+                    "tier": "pro"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "API key created — plaintext shown once",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateApiKeyResponse"
+                },
+                "examples": {
+                  "created": {
+                    "summary": "New API key with one-time plaintext",
+                    "value": {
+                      "plaintext": "0xr_pro_a1b2c3d4e5f6g7h8i9j0k1l2",
+                      "key": {
+                        "id": "key_ghi789",
+                        "key_prefix": "0xr_pro_",
+                        "tier": "pro",
+                        "created_at": "2026-05-27T06:38:15Z"
+                      },
+                      "warning": "Store this key now. The full plaintext will not be shown again."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "missingKey": {
+                    "summary": "No API key provided",
+                    "value": {
+                      "detail": "Missing X-API-Key header or api_key query param",
+                      "code": "missing_api_key"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/me/api-keys/{key_id}": {
+      "delete": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Revoke API key",
+        "description": "Permanently revokes an API key owned by the authenticated user. The key immediately stops working. This action cannot be undone.",
+        "operationId": "deleteApiKey",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the key to revoke (from GET /v1/me/api-keys)",
+            "schema": {
+              "type": "string",
+              "example": "key_ghi789"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "API key revoked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "status",
+                    "id"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "Always 'revoked' on success",
+                      "example": "revoked"
+                    },
+                    "id": {
+                      "type": "string",
+                      "description": "ID of the revoked key",
+                      "example": "key_ghi789"
+                    }
+                  }
+                },
+                "examples": {
+                  "revoked": {
+                    "summary": "Key successfully revoked",
+                    "value": {
+                      "status": "revoked",
+                      "id": "key_ghi789"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "missingKey": {
+                    "summary": "No API key provided",
+                    "value": {
+                      "detail": "Missing X-API-Key header or api_key query param",
+                      "code": "missing_api_key"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "notFound": {
+                    "summary": "Resource not found",
+                    "value": {
+                      "detail": "Not found",
+                      "code": "not_found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/me/usage": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Usage statistics",
+        "description": "Returns request counts for the authenticated user over the last N days. Useful for monitoring API consumption.",
+        "operationId": "getUsageStats",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "description": "Number of days to include (1-30)",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30,
+              "default": 7,
+              "example": 7
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usage statistics for the requested period",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageResponse"
+                },
+                "examples": {
+                  "lastWeek": {
+                    "summary": "Last 7 days of usage",
+                    "value": {
+                      "days": 7,
+                      "series": [
+                        {
+                          "day_offset": 0,
+                          "requests": 142
+                        },
+                        {
+                          "day_offset": 1,
+                          "requests": 98
+                        },
+                        {
+                          "day_offset": 2,
+                          "requests": 215
+                        },
+                        {
+                          "day_offset": 3,
+                          "requests": 67
+                        },
+                        {
+                          "day_offset": 4,
+                          "requests": 189
+                        },
+                        {
+                          "day_offset": 5,
+                          "requests": 45
+                        },
+                        {
+                          "day_offset": 6,
+                          "requests": 310
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "missingKey": {
+                    "summary": "No API key provided",
+                    "value": {
+                      "detail": "Missing X-API-Key header or api_key query param",
+                      "code": "missing_api_key"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/me/rate-limit": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Current rate limit status",
+        "description": "Returns the current rate limit usage for the authenticated user, showing how many requests remain in the per-minute and per-day windows.",
+        "operationId": "getRateLimitStatus",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rate limit status",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitResponse"
+                },
+                "examples": {
+                  "proTier": {
+                    "summary": "Pro tier rate limits",
+                    "value": {
+                      "tier": "pro",
+                      "minute": {
+                        "used": 45,
+                        "limit": 600
+                      },
+                      "day": {
+                        "used": 1234,
+                        "limit": 100000
+                      }
+                    }
+                  },
+                  "freeTier": {
+                    "summary": "Free tier rate limits",
+                    "value": {
+                      "tier": "free",
+                      "minute": {
+                        "used": 8,
+                        "limit": 10
+                      },
+                      "day": {
+                        "used": 87,
+                        "limit": 100
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "missingKey": {
+                    "summary": "No API key provided",
+                    "value": {
+                      "detail": "Missing X-API-Key header or api_key query param",
+                      "code": "missing_api_key"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/me/subscription": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Active subscription",
+        "description": "Returns the user's active subscription details. Returns `null` for free tier users.",
+        "operationId": "getSubscription",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Active subscription or null",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionResponse"
+                },
+                "examples": {
+                  "proMonthly": {
+                    "summary": "Active pro monthly subscription",
+                    "value": {
+                      "subscription": {
+                        "plan": "pro_monthly",
+                        "status": "active",
+                        "started_at": "2026-05-20T10:00:00Z",
+                        "expires_at": "2026-06-20T10:00:00Z",
+                        "payment_coin": "ETH"
+                      }
+                    }
+                  },
+                  "freeUser": {
+                    "summary": "No active subscription",
+                    "value": {
+                      "subscription": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "missingKey": {
+                    "summary": "No API key provided",
+                    "value": {
+                      "detail": "Missing X-API-Key header or api_key query param",
+                      "code": "missing_api_key"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/me/orders": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Payment history",
+        "description": "Returns the authenticated user's payment/order history from NOWPayments.",
+        "operationId": "getOrders",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment order history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdersResponse"
+                },
+                "examples": {
+                  "twoOrders": {
+                    "summary": "Two past orders",
+                    "value": {
+                      "orders": [
+                        {
+                          "order_id": "ord_abc123",
+                          "invoice_id": "inv_456",
+                          "plan": "pro_monthly",
+                          "pay_amount": "0.025",
+                          "pay_currency": "ETH",
+                          "status": "completed",
+                          "created_at": "2026-05-20T10:00:00Z"
+                        },
+                        {
+                          "order_id": "ord_def456",
+                          "invoice_id": "inv_789",
+                          "plan": "pro_yearly",
+                          "pay_amount": "0.25",
+                          "pay_currency": "ETH",
+                          "status": "completed",
+                          "created_at": "2026-05-25T14:30:00Z"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "missingKey": {
+                    "summary": "No API key provided",
+                    "value": {
+                      "detail": "Missing X-API-Key header or api_key query param",
+                      "code": "missing_api_key"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/me/checkout": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Checkout — create NOWPayments invoice",
+        "description": "Creates a NOWPayments invoice for the authenticated user to upgrade their plan. Returns payment details including the deposit address and amount.\n\n**Plans:**\n- `pro_monthly` — Pro tier, renewed monthly\n- `pro_yearly` — Pro tier, renewed yearly (discounted)\n- `lifetime` — Pro tier, one-time payment for lifetime access\n\n**Default coin:** ETH. Payment is tracked via the NOWPayments IPN webhook.",
+        "operationId": "createCheckout",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckoutRequest"
+              },
+              "examples": {
+                "proMonthlyEth": {
+                  "summary": "Pro monthly with ETH",
+                  "value": {
+                    "plan": "pro_monthly",
+                    "coin": "eth"
+                  }
+                },
+                "lifetimeBtc": {
+                  "summary": "Lifetime with BTC",
+                  "value": {
+                    "plan": "lifetime",
+                    "coin": "btc"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "NOWPayments invoice created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutResponse"
+                },
+                "examples": {
+                  "proMonthly": {
+                    "summary": "Pro monthly ETH invoice",
+                    "value": {
+                      "url": "https://nowpayments.io/payment/?iid=1234567890",
+                      "invoice_id": "1234567890",
+                      "order_id": "ord_abc123",
+                      "pay_address": "0x742d35Cc6634C0532925a3b844BcD9B5C1c4D1a5",
+                      "pay_amount": "0.025",
+                      "pay_currency": "ETH"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid plan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalidPlan": {
+                    "summary": "Unknown plan name",
+                    "value": {
+                      "detail": "Invalid plan 'premium'. Available: pro_monthly, pro_yearly, lifetime",
+                      "code": "invalid_plan"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "missingKey": {
+                    "summary": "No API key provided",
+                    "value": {
+                      "detail": "Missing X-API-Key header or api_key query param",
+                      "code": "missing_api_key"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/me/account": {
+      "delete": {
+        "tags": [
+          "User"
+        ],
+        "summary": "GDPR account deletion",
+        "description": "Permanently deletes the authenticated user's account and all associated data (API keys, usage stats, payment history). This action is irreversible and fulfills GDPR right-to-erasure requirements.",
+        "operationId": "deleteAccount",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "status"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "deleted"
+                    }
+                  }
+                },
+                "examples": {
+                  "deleted": {
+                    "summary": "Account deleted",
+                    "value": {
+                      "status": "deleted"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "missingKey": {
+                    "summary": "No API key provided",
+                    "value": {
+                      "detail": "Missing X-API-Key header or api_key query param",
+                      "code": "missing_api_key"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/checkout/crypto": {
+      "post": {
+        "tags": [
+          "Payments"
+        ],
+        "summary": "Crypto checkout (unauthenticated)",
+        "description": "Creates a NOWPayments invoice for the given email address — no authentication required. This allows users to purchase API access before creating an account.\n\n**Valid coins:** btc, eth, sol, bnb, kas, usdt, usdc.\n**Plans:** pro_monthly, pro_yearly, lifetime.\n\nAn account is automatically provisioned when the payment is confirmed via IPN webhook.",
+        "operationId": "createCryptoCheckout",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckoutCryptoRequest"
+              },
+              "examples": {
+                "proMonthlySol": {
+                  "summary": "Pro monthly with SOL",
+                  "value": {
+                    "plan": "pro_monthly",
+                    "email": "vitalik@ethereum.org",
+                    "coin": "sol"
+                  }
+                },
+                "lifetimeUsdt": {
+                  "summary": "Lifetime with USDT",
+                  "value": {
+                    "plan": "lifetime",
+                    "email": "vitalik@ethereum.org",
+                    "coin": "usdt"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "NOWPayments invoice created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutResponse"
+                },
+                "examples": {
+                  "proMonthly": {
+                    "summary": "Pro monthly SOL invoice",
+                    "value": {
+                      "url": "https://nowpayments.io/payment/?iid=1234567890",
+                      "invoice_id": "1234567890",
+                      "order_id": "ord_abc123",
+                      "pay_address": "7EcD...solana_address",
+                      "pay_amount": "0.15",
+                      "pay_currency": "SOL"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid plan or coin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalidPlan": {
+                    "summary": "Unknown plan",
+                    "value": {
+                      "detail": "Invalid plan 'premium'. Available: pro_monthly, pro_yearly, lifetime",
+                      "code": "invalid_plan"
+                    }
+                  },
+                  "invalidCoin": {
+                    "summary": "Unsupported coin",
+                    "value": {
+                      "detail": "Invalid coin 'doge'. Available: btc, eth, sol, bnb, kas, usdt, usdc",
+                      "code": "invalid_coin"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/positions/{address}": {
+      "get": {
+        "tags": [
+          "Positions"
+        ],
+        "summary": "Get DeFi positions",
+        "description": "Aggregates DeFi positions across multiple protocols in parallel for a given wallet address. Queries lending protocols (Aave v3, HyperLend, Sentiment v2, Compound v3) and LP positions (Uniswap v3). Returns collateral, debt, health factors, and LP value.\n\nResults are cached for 60 seconds. Only EVM addresses are supported (no Solana for positions).",
+        "operationId": "getPositions",
+        "security": [
+          {},
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "description": "EVM wallet address (0x prefix, 42 characters)",
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$",
+              "example": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+            }
+          },
+          {
+            "name": "protocols",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated protocol IDs to query",
+            "schema": {
+              "type": "string",
+              "default": "aave_v3,hyperlend,sentiment_v2,uniswap_v3,compound_v3",
+              "example": "aave_v3,uniswap_v3"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "DeFi positions with protocol breakdown",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PositionsResponse"
+                },
+                "examples": {
+                  "vitalik": {
+                    "summary": "Vitalik's DeFi positions",
+                    "value": {
+                      "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+                      "summary": {
+                        "total_collateral_usd": "50000.00",
+                        "total_debt_usd": "12000.00",
+                        "net_lending_usd": "38000.00",
+                        "total_lp_value_usd": "25000.00",
+                        "out_of_range_lp_count": 1,
+                        "min_health_factor": "1.85",
+                        "active_lending_positions": 3,
+                        "protocols_queried": [
+                          "aave_v3",
+                          "hyperlend",
+                          "uniswap_v3",
+                          "compound_v3"
+                        ]
+                      },
+                      "by_protocol": {
+                        "aave_v3": {
+                          "collateral": [
+                            {
+                              "token": "ETH",
+                              "amount": "10.0",
+                              "value_usd": "20611.50"
+                            },
+                            {
+                              "token": "USDC",
+                              "amount": "5000.0",
+                              "value_usd": "5000.00"
+                            }
+                          ],
+                          "debt": [
+                            {
+                              "token": "USDT",
+                              "amount": "3000.0",
+                              "value_usd": "3000.00"
+                            }
+                          ],
+                          "health_factor": "1.85"
+                        },
+                        "uniswap_v3": {
+                          "pools": [
+                            {
+                              "pool": "ETH/USDC",
+                              "value_usd": "25000.00",
+                              "in_range": true,
+                              "fee_tier": "0.3%"
+                            }
+                          ]
+                        }
+                      },
+                      "fetched_at": "2026-05-27T06:38:20.123456"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid address",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalidAddress": {
+                    "summary": "Invalid address format",
+                    "value": {
+                      "detail": "Invalid EVM address (expected 0x... 42 chars)",
+                      "code": "invalid_address"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/v1/token/{address}/risk": {
+      "get": {
+        "tags": [
+          "Risk"
+        ],
+        "summary": "Token risk scoring",
+        "description": "Performs a comprehensive security analysis of an ERC-20 token contract using GoPlus Security. Evaluates signals including honeypot detection, buy/sell tax, proxy risk, liquidity, owner privileges, and more.\n\n**Not supported on hyperevm or solana.** Currently only EVM-compatible chains with Etherscan-style explorers are supported.",
+        "operationId": "getTokenRisk",
+        "security": [
+          {},
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "description": "Token contract address (EVM, 0x... 42 chars)",
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$",
+              "example": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+            }
+          },
+          {
+            "name": "chain",
+            "in": "query",
+            "required": false,
+            "description": "Chain ID. Not supported on hyperevm or solana.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ethereum",
+                "arbitrum",
+                "base",
+                "optimism",
+                "polygon",
+                "bsc"
+              ],
+              "default": "ethereum",
+              "example": "ethereum"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token risk assessment",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenRiskResponse"
+                },
+                "examples": {
+                  "lowRisk": {
+                    "summary": "Low risk token (USDC)",
+                    "value": {
+                      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+                      "chain": "ethereum",
+                      "symbol": "USDC",
+                      "name": "USD Coin",
+                      "decimals": 6,
+                      "risk_score": 2,
+                      "risk_level": "low",
+                      "reasons": [],
+                      "positive_signals": [
+                        {
+                          "signal": "Verified contract",
+                          "evidence": "Contract source code verified on Etherscan"
+                        },
+                        {
+                          "signal": "No honeypot",
+                          "evidence": "Buy and sell transactions execute normally"
+                        }
+                      ],
+                      "metadata": {
+                        "explorer_url": "https://etherscan.io/token/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+                        "dexscreener_url": "https://dexscreener.com/ethereum/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+                        "signals_checked": 15,
+                        "confidence": "high"
+                      },
+                      "fetched_at": "2026-05-27T06:38:22.654321"
+                    }
+                  },
+                  "highRisk": {
+                    "summary": "High risk token — multiple warnings",
+                    "value": {
+                      "address": "0xDef1...abc123",
+                      "chain": "ethereum",
+                      "symbol": "SCAM",
+                      "name": "Scam Token",
+                      "decimals": 18,
+                      "risk_score": 85,
+                      "risk_level": "high",
+                      "reasons": [
+                        {
+                          "signal": "Honeypot detected",
+                          "severity": "critical",
+                          "evidence": "Sell transaction simulation failed — tokens cannot be sold"
+                        },
+                        {
+                          "signal": "High sell tax",
+                          "severity": "high",
+                          "evidence": "Sell tax: 99% — likely scam"
+                        },
+                        {
+                          "signal": "Owner can mint",
+                          "severity": "medium",
+                          "evidence": "Owner address can mint unlimited tokens"
+                        }
+                      ],
+                      "positive_signals": [],
+                      "metadata": {
+                        "explorer_url": "https://etherscan.io/token/0xDef1...abc123",
+                        "dexscreener_url": null,
+                        "signals_checked": 15,
+                        "confidence": "high"
+                      },
+                      "fetched_at": "2026-05-27T06:38:22.654321"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid address or unsupported chain",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalidAddress": {
+                    "summary": "Invalid address format",
+                    "value": {
+                      "detail": "Invalid EVM address (expected 0x... 42 chars)",
+                      "code": "invalid_address"
+                    }
+                  },
+                  "unsupportedChain": {
+                    "summary": "Chain not supported for risk analysis",
+                    "value": {
+                      "detail": "Risk analysis not supported on 'solana'. Available: ethereum, arbitrum, base, optimism, polygon, bsc",
+                      "code": "unsupported_chain"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/webhook/nowpayments": {
+      "post": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "NOWPayments IPN webhook",
+        "description": "Receives Instant Payment Notifications (IPN) from NOWPayments. Validates the HMAC-SHA512 signature from the `x-nowpayments-sig` header before processing.\n\nOn confirmed payment: upgrades the user's tier, sends receipt email, activates subscription.\n\n**IPN security:** Signature is verified against NOWPayments IPN secret key. Unverified requests are silently rejected with 200 to prevent retry storms.",
+        "operationId": "nowpaymentsIpn",
+        "security": [],
+        "parameters": [
+          {
+            "name": "x-nowpayments-sig",
+            "in": "header",
+            "required": true,
+            "description": "HMAC-SHA512 signature of the request body (from NOWPayments IPN)",
+            "schema": {
+              "type": "string",
+              "example": "abc123def456..."
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "NOWPayments IPN payload — raw JSON from NOWPayments"
+              },
+              "examples": {
+                "paymentConfirmed": {
+                  "summary": "Payment confirmed IPN",
+                  "value": {
+                    "payment_id": "1234567890",
+                    "invoice_id": "9876543210",
+                    "payment_status": "confirmed",
+                    "pay_address": "0x742d35Cc6634C0532925a3b844BcD9B5C1c4D1a5",
+                    "pay_amount": "0.025",
+                    "actually_paid": "0.025",
+                    "pay_currency": "ETH",
+                    "order_id": "ord_abc123",
+                    "purchase_id": "pur_xyz789"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "IPN processed (or already processed — idempotent)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "status"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "ok",
+                        "already_processed"
+                      ],
+                      "example": "ok"
+                    }
+                  }
+                },
+                "examples": {
+                  "ok": {
+                    "summary": "IPN processed",
+                    "value": {
+                      "status": "ok"
+                    }
+                  },
+                  "alreadyProcessed": {
+                    "summary": "Duplicate IPN",
+                    "value": {
+                      "status": "already_processed"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -840,7 +2516,12 @@
     "schemas": {
       "ServiceInfo": {
         "type": "object",
-        "required": ["app", "version", "docs", "endpoints"],
+        "required": [
+          "app",
+          "version",
+          "docs",
+          "endpoints"
+        ],
         "properties": {
           "app": {
             "type": "string",
@@ -857,21 +2538,40 @@
           "endpoints": {
             "type": "object",
             "properties": {
-              "health": { "type": "string" },
-              "wallet_balances": { "type": "string" },
-              "wallet_portfolio": { "type": "string" },
-              "sweep_quote": { "type": "string" }
+              "health": {
+                "type": "string"
+              },
+              "wallet_balances": {
+                "type": "string"
+              },
+              "wallet_portfolio": {
+                "type": "string"
+              },
+              "sweep_quote": {
+                "type": "string"
+              }
             }
           }
         }
       },
       "HealthResponse": {
         "type": "object",
-        "required": ["status", "service", "version", "supported_chains", "chain_count", "timestamp"],
+        "required": [
+          "status",
+          "service",
+          "version",
+          "supported_chains",
+          "chain_count",
+          "timestamp"
+        ],
         "properties": {
           "status": {
             "type": "string",
-            "enum": ["ok", "degraded", "down"],
+            "enum": [
+              "ok",
+              "degraded",
+              "down"
+            ],
             "example": "ok"
           },
           "service": {
@@ -884,8 +2584,18 @@
           },
           "supported_chains": {
             "type": "array",
-            "items": { "type": "string" },
-            "example": ["ethereum", "arbitrum", "base", "optimism", "polygon", "hyperevm", "bsc"]
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "ethereum",
+              "arbitrum",
+              "base",
+              "optimism",
+              "polygon",
+              "hyperevm",
+              "bsc"
+            ]
           },
           "chain_count": {
             "type": "integer",
@@ -896,7 +2606,9 @@
             "additionalProperties": {
               "type": "string"
             },
-            "example": { "redis": "ok" }
+            "example": {
+              "redis": "ok"
+            }
           },
           "timestamp": {
             "type": "string",
@@ -907,7 +2619,14 @@
       },
       "Chain": {
         "type": "object",
-        "required": ["id", "name", "native_symbol", "chain_id", "explorer", "is_l2"],
+        "required": [
+          "id",
+          "name",
+          "native_symbol",
+          "chain_id",
+          "explorer",
+          "is_l2"
+        ],
         "properties": {
           "id": {
             "type": "string",
@@ -944,11 +2663,16 @@
       },
       "ChainsResponse": {
         "type": "object",
-        "required": ["chains", "count"],
+        "required": [
+          "chains",
+          "count"
+        ],
         "properties": {
           "chains": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/Chain" }
+            "items": {
+              "$ref": "#/components/schemas/Chain"
+            }
           },
           "count": {
             "type": "integer",
@@ -958,7 +2682,11 @@
       },
       "NativeBalance": {
         "type": "object",
-        "required": ["symbol", "balance", "value_usd"],
+        "required": [
+          "symbol",
+          "balance",
+          "value_usd"
+        ],
         "properties": {
           "symbol": {
             "type": "string",
@@ -970,12 +2698,18 @@
             "example": "5.68"
           },
           "price_usd": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Current USD price",
             "example": "2061.15"
           },
           "value_usd": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Total USD value of native balance",
             "example": "11706.32"
           }
@@ -983,7 +2717,13 @@
       },
       "TokenBalance": {
         "type": "object",
-        "required": ["contract", "symbol", "decimals", "balance", "balance_raw"],
+        "required": [
+          "contract",
+          "symbol",
+          "decimals",
+          "balance",
+          "balance_raw"
+        ],
         "properties": {
           "contract": {
             "type": "string",
@@ -991,12 +2731,18 @@
             "example": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
           },
           "symbol": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Token symbol (null if unknown)",
             "example": "USDC"
           },
           "name": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Token name (null if unknown)",
             "example": "USD Coin"
           },
@@ -1008,7 +2754,10 @@
             "example": 6
           },
           "logo": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "uri",
             "description": "Token logo URL (null if unavailable)",
             "example": null
@@ -1024,12 +2773,18 @@
             "example": "1500000000"
           },
           "price_usd": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Current USD price (null if prices disabled or unavailable)",
             "example": "1.00"
           },
           "value_usd": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Total USD value of this token holding (null if prices disabled)",
             "example": "1500.0"
           }
@@ -1037,7 +2792,11 @@
       },
       "ChainInfo": {
         "type": "object",
-        "required": ["name", "chain_id", "explorer"],
+        "required": [
+          "name",
+          "chain_id",
+          "explorer"
+        ],
         "properties": {
           "name": {
             "type": "string",
@@ -1056,7 +2815,17 @@
       },
       "BalancesResponse": {
         "type": "object",
-        "required": ["address", "chain", "chain_info", "native", "tokens", "token_count_total", "token_count_shown", "total_value_usd", "timestamp"],
+        "required": [
+          "address",
+          "chain",
+          "chain_info",
+          "native",
+          "tokens",
+          "token_count_total",
+          "token_count_shown",
+          "total_value_usd",
+          "timestamp"
+        ],
         "properties": {
           "address": {
             "type": "string",
@@ -1075,7 +2844,9 @@
           },
           "tokens": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/TokenBalance" }
+            "items": {
+              "$ref": "#/components/schemas/TokenBalance"
+            }
           },
           "token_count_total": {
             "type": "integer",
@@ -1101,7 +2872,16 @@
       },
       "PortfolioResponse": {
         "type": "object",
-        "required": ["address", "chains_requested", "chains_with_value", "total_value_usd", "total_tokens", "by_chain", "errors", "timestamp"],
+        "required": [
+          "address",
+          "chains_requested",
+          "chains_with_value",
+          "total_value_usd",
+          "total_tokens",
+          "by_chain",
+          "errors",
+          "timestamp"
+        ],
         "properties": {
           "address": {
             "type": "string",
@@ -1109,9 +2889,14 @@
           },
           "chains_requested": {
             "type": "array",
-            "items": { "type": "string" },
+            "items": {
+              "type": "string"
+            },
             "description": "Chain IDs that were requested",
-            "example": ["ethereum", "base"]
+            "example": [
+              "ethereum",
+              "base"
+            ]
           },
           "chains_with_value": {
             "type": "integer",
@@ -1140,8 +2925,12 @@
             "items": {
               "type": "object",
               "properties": {
-                "chain": { "type": "string" },
-                "error": { "type": "string" }
+                "chain": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                }
               }
             },
             "description": "Errors for individual chains (partial success)",
@@ -1156,7 +2945,13 @@
       },
       "SweepChainQuote": {
         "type": "object",
-        "required": ["chain", "token_count", "gas_cost_usd", "net_value_usd", "is_profitable"],
+        "required": [
+          "chain",
+          "token_count",
+          "gas_cost_usd",
+          "net_value_usd",
+          "is_profitable"
+        ],
         "properties": {
           "chain": {
             "type": "string",
@@ -1187,7 +2982,9 @@
       },
       "SweepSummary": {
         "type": "object",
-        "required": ["recommendation"],
+        "required": [
+          "recommendation"
+        ],
         "properties": {
           "total_gross_value_usd": {
             "type": "string",
@@ -1203,7 +3000,11 @@
           },
           "recommendation": {
             "type": "string",
-            "enum": ["sweep", "skip", "partial"],
+            "enum": [
+              "sweep",
+              "skip",
+              "partial"
+            ],
             "description": "Overall recommendation based on profitability analysis",
             "example": "sweep"
           },
@@ -1215,7 +3016,14 @@
       },
       "SweepQuoteResponse": {
         "type": "object",
-        "required": ["address", "chains_evaluated", "target_chain", "by_chain", "summary", "timestamp"],
+        "required": [
+          "address",
+          "chains_evaluated",
+          "target_chain",
+          "by_chain",
+          "summary",
+          "timestamp"
+        ],
         "properties": {
           "address": {
             "type": "string",
@@ -1223,9 +3031,14 @@
           },
           "chains_evaluated": {
             "type": "array",
-            "items": { "type": "string" },
+            "items": {
+              "type": "string"
+            },
             "description": "Chain IDs that were analyzed",
-            "example": ["ethereum", "base"]
+            "example": [
+              "ethereum",
+              "base"
+            ]
           },
           "target_chain": {
             "type": "string",
@@ -1234,7 +3047,9 @@
           },
           "by_chain": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/SweepChainQuote" }
+            "items": {
+              "$ref": "#/components/schemas/SweepChainQuote"
+            }
           },
           "summary": {
             "$ref": "#/components/schemas/SweepSummary"
@@ -1248,7 +3063,13 @@
       },
       "AdminKey": {
         "type": "object",
-        "required": ["hash_prefix", "user_id", "tier", "name", "created_at"],
+        "required": [
+          "hash_prefix",
+          "user_id",
+          "tier",
+          "name",
+          "created_at"
+        ],
         "properties": {
           "hash_prefix": {
             "type": "string",
@@ -1261,7 +3082,11 @@
           },
           "tier": {
             "type": "string",
-            "enum": ["free", "dev", "pro"],
+            "enum": [
+              "free",
+              "dev",
+              "pro"
+            ],
             "example": "pro"
           },
           "name": {
@@ -1277,17 +3102,23 @@
       },
       "AdminKeysResponse": {
         "type": "object",
-        "required": ["keys"],
+        "required": [
+          "keys"
+        ],
         "properties": {
           "keys": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/AdminKey" }
+            "items": {
+              "$ref": "#/components/schemas/AdminKey"
+            }
           }
         }
       },
       "Error": {
         "type": "object",
-        "required": ["detail"],
+        "required": [
+          "detail"
+        ],
         "properties": {
           "detail": {
             "type": "string",
@@ -1298,6 +3129,846 @@
             "type": "string",
             "description": "Machine-readable error code",
             "example": "invalid_address"
+          }
+        }
+      },
+      "MagicLinkRequest": {
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address to send the magic link to",
+            "example": "vitalik@ethereum.org"
+          }
+        }
+      },
+      "VerifyRequest": {
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "The JWT token from the magic link URL",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2aXRhbGlrQGV0aGVyZXVtLm9yZyIsImV4cCI6MTc0ODMzMjAwMH0.abc123"
+          }
+        }
+      },
+      "MagicLinkResponse": {
+        "type": "object",
+        "required": [
+          "sent"
+        ],
+        "properties": {
+          "sent": {
+            "type": "boolean",
+            "description": "Always true (anti-enumeration — even for unknown emails)",
+            "example": true
+          }
+        }
+      },
+      "VerifyResponse": {
+        "type": "object",
+        "required": [
+          "token",
+          "user"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Session JWT to use as X-API-Key for authenticated endpoints",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2aXRhbGlrQGV0aGVyZXVtLm9yZyIsInRpZXIiOiJmcmVlIiwiZXhwIjoxNzQ4MzM1NjAwfQ.xyz789"
+          },
+          "user": {
+            "type": "object",
+            "required": [
+              "id",
+              "email",
+              "tier"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": "usr_a1b2c3d4"
+              },
+              "email": {
+                "type": "string",
+                "format": "email",
+                "example": "vitalik@ethereum.org"
+              },
+              "tier": {
+                "type": "string",
+                "enum": [
+                  "free",
+                  "dev",
+                  "pro"
+                ],
+                "example": "free"
+              }
+            }
+          }
+        }
+      },
+      "UserMeResponse": {
+        "type": "object",
+        "required": [
+          "user_id",
+          "email",
+          "tier",
+          "key_prefix"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "example": "usr_a1b2c3d4"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "vitalik@ethereum.org"
+          },
+          "tier": {
+            "type": "string",
+            "enum": [
+              "free",
+              "dev",
+              "pro"
+            ],
+            "example": "pro"
+          },
+          "key_prefix": {
+            "type": "string",
+            "description": "Prefix of the current API key",
+            "example": "0xr_pro_"
+          },
+          "expires_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "When the current tier expires. null = never",
+            "example": "2027-05-27T06:38:15Z"
+          }
+        }
+      },
+      "ApiKeyResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "key_prefix",
+          "tier",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "key_abc123"
+          },
+          "key_prefix": {
+            "type": "string",
+            "description": "Prefix for display (full key never exposed)",
+            "example": "0xr_pro_"
+          },
+          "tier": {
+            "type": "string",
+            "enum": [
+              "free",
+              "dev",
+              "pro"
+            ],
+            "example": "pro"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-05-20T10:00:00Z"
+          },
+          "last_used_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Last time this key was used",
+            "example": "2026-05-27T06:00:00Z"
+          },
+          "expires_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "When this key expires. null = never",
+            "example": null
+          }
+        }
+      },
+      "ApiKeysListResponse": {
+        "type": "object",
+        "required": [
+          "keys"
+        ],
+        "properties": {
+          "keys": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiKeyResponse"
+            }
+          }
+        }
+      },
+      "CreateApiKeyResponse": {
+        "type": "object",
+        "required": [
+          "plaintext",
+          "key",
+          "warning"
+        ],
+        "properties": {
+          "plaintext": {
+            "type": "string",
+            "description": "The full API key — shown ONCE, never stored or retrievable again",
+            "example": "0xr_pro_a1b2c3d4e5f6g7h8i9j0k1l2"
+          },
+          "key": {
+            "type": "object",
+            "required": [
+              "id",
+              "key_prefix",
+              "tier",
+              "created_at"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": "key_ghi789"
+              },
+              "key_prefix": {
+                "type": "string",
+                "example": "0xr_pro_"
+              },
+              "tier": {
+                "type": "string",
+                "enum": [
+                  "free",
+                  "dev",
+                  "pro"
+                ],
+                "example": "pro"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "example": "2026-05-27T06:38:15Z"
+              }
+            }
+          },
+          "warning": {
+            "type": "string",
+            "description": "Reminder that the plaintext key will not be shown again",
+            "example": "Store this key now. The full plaintext will not be shown again."
+          }
+        }
+      },
+      "UsageResponse": {
+        "type": "object",
+        "required": [
+          "days",
+          "series"
+        ],
+        "properties": {
+          "days": {
+            "type": "integer",
+            "example": 7
+          },
+          "series": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "day_offset",
+                "requests"
+              ],
+              "properties": {
+                "day_offset": {
+                  "type": "integer",
+                  "description": "0 = today, 1 = yesterday, etc.",
+                  "example": 0
+                },
+                "requests": {
+                  "type": "integer",
+                  "example": 142
+                }
+              }
+            }
+          }
+        }
+      },
+      "RateLimitResponse": {
+        "type": "object",
+        "required": [
+          "tier",
+          "minute",
+          "day"
+        ],
+        "properties": {
+          "tier": {
+            "type": "string",
+            "enum": [
+              "free",
+              "dev",
+              "pro"
+            ],
+            "example": "pro"
+          },
+          "minute": {
+            "type": "object",
+            "required": [
+              "used",
+              "limit"
+            ],
+            "properties": {
+              "used": {
+                "type": "integer",
+                "example": 45
+              },
+              "limit": {
+                "type": "integer",
+                "example": 600
+              }
+            }
+          },
+          "day": {
+            "type": "object",
+            "required": [
+              "used",
+              "limit"
+            ],
+            "properties": {
+              "used": {
+                "type": "integer",
+                "example": 1234
+              },
+              "limit": {
+                "type": "integer",
+                "example": 100000
+              }
+            }
+          }
+        }
+      },
+      "SubscriptionResponse": {
+        "type": "object",
+        "required": [
+          "subscription"
+        ],
+        "properties": {
+          "subscription": {
+            "description": "Active subscription details, or null for free tier",
+            "oneOf": [
+              {
+                "type": "object",
+                "required": [
+                  "plan",
+                  "status",
+                  "started_at",
+                  "expires_at"
+                ],
+                "properties": {
+                  "plan": {
+                    "type": "string",
+                    "example": "pro_monthly"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "active",
+                      "expired",
+                      "cancelled"
+                    ],
+                    "example": "active"
+                  },
+                  "started_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2026-05-20T10:00:00Z"
+                  },
+                  "expires_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2026-06-20T10:00:00Z"
+                  },
+                  "payment_coin": {
+                    "type": "string",
+                    "example": "ETH"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "example": null
+          }
+        }
+      },
+      "OrdersResponse": {
+        "type": "object",
+        "required": [
+          "orders"
+        ],
+        "properties": {
+          "orders": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "order_id",
+                "plan",
+                "pay_amount",
+                "pay_currency",
+                "status",
+                "created_at"
+              ],
+              "properties": {
+                "order_id": {
+                  "type": "string",
+                  "example": "ord_abc123"
+                },
+                "invoice_id": {
+                  "type": "string",
+                  "example": "inv_456"
+                },
+                "plan": {
+                  "type": "string",
+                  "example": "pro_monthly"
+                },
+                "pay_amount": {
+                  "type": "string",
+                  "example": "0.025"
+                },
+                "pay_currency": {
+                  "type": "string",
+                  "example": "ETH"
+                },
+                "status": {
+                  "type": "string",
+                  "example": "completed"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "example": "2026-05-20T10:00:00Z"
+                }
+              }
+            }
+          }
+        }
+      },
+      "CheckoutRequest": {
+        "type": "object",
+        "required": [
+          "plan"
+        ],
+        "properties": {
+          "plan": {
+            "type": "string",
+            "enum": [
+              "pro_monthly",
+              "pro_yearly",
+              "lifetime"
+            ],
+            "description": "Subscription plan",
+            "example": "pro_monthly"
+          },
+          "coin": {
+            "type": "string",
+            "description": "Payment cryptocurrency (default: eth)",
+            "enum": [
+              "btc",
+              "eth",
+              "sol",
+              "bnb",
+              "kas",
+              "usdt",
+              "usdc"
+            ],
+            "default": "eth",
+            "example": "eth"
+          }
+        }
+      },
+      "CheckoutCryptoRequest": {
+        "type": "object",
+        "required": [
+          "plan",
+          "email"
+        ],
+        "properties": {
+          "plan": {
+            "type": "string",
+            "enum": [
+              "pro_monthly",
+              "pro_yearly",
+              "lifetime"
+            ],
+            "description": "Subscription plan",
+            "example": "pro_monthly"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address for account creation and receipt delivery",
+            "example": "vitalik@ethereum.org"
+          },
+          "coin": {
+            "type": "string",
+            "description": "Payment cryptocurrency (default: eth)",
+            "enum": [
+              "btc",
+              "eth",
+              "sol",
+              "bnb",
+              "kas",
+              "usdt",
+              "usdc"
+            ],
+            "default": "eth",
+            "example": "sol"
+          }
+        }
+      },
+      "CheckoutResponse": {
+        "type": "object",
+        "required": [
+          "url",
+          "invoice_id",
+          "order_id",
+          "pay_address",
+          "pay_amount",
+          "pay_currency"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "NOWPayments payment page URL",
+            "example": "https://nowpayments.io/payment/?iid=1234567890"
+          },
+          "invoice_id": {
+            "type": "string",
+            "description": "NOWPayments invoice ID",
+            "example": "1234567890"
+          },
+          "order_id": {
+            "type": "string",
+            "description": "0xRadar internal order ID",
+            "example": "ord_abc123"
+          },
+          "pay_address": {
+            "type": "string",
+            "description": "Deposit address to send payment to",
+            "example": "0x742d35Cc6634C0532925a3b844BcD9B5C1c4D1a5"
+          },
+          "pay_amount": {
+            "type": "string",
+            "description": "Amount to pay in pay_currency",
+            "example": "0.025"
+          },
+          "pay_currency": {
+            "type": "string",
+            "description": "Cryptocurrency to pay with",
+            "example": "ETH"
+          }
+        }
+      },
+      "PositionsSummary": {
+        "type": "object",
+        "required": [
+          "total_collateral_usd",
+          "total_debt_usd",
+          "net_lending_usd",
+          "total_lp_value_usd",
+          "out_of_range_lp_count",
+          "min_health_factor",
+          "active_lending_positions",
+          "protocols_queried"
+        ],
+        "properties": {
+          "total_collateral_usd": {
+            "type": "string",
+            "description": "Total collateral across all lending protocols",
+            "example": "50000.00"
+          },
+          "total_debt_usd": {
+            "type": "string",
+            "description": "Total debt across all lending protocols",
+            "example": "12000.00"
+          },
+          "net_lending_usd": {
+            "type": "string",
+            "description": "Net lending position (collateral - debt)",
+            "example": "38000.00"
+          },
+          "total_lp_value_usd": {
+            "type": "string",
+            "description": "Total LP position value across pools",
+            "example": "25000.00"
+          },
+          "out_of_range_lp_count": {
+            "type": "integer",
+            "description": "Number of LP positions out of trading range",
+            "example": 1
+          },
+          "min_health_factor": {
+            "type": "string",
+            "description": "Lowest health factor across lending positions (lower = riskier)",
+            "example": "1.85"
+          },
+          "active_lending_positions": {
+            "type": "integer",
+            "description": "Total number of active lending positions",
+            "example": 3
+          },
+          "protocols_queried": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Protocols successfully queried",
+            "example": [
+              "aave_v3",
+              "hyperlend",
+              "uniswap_v3",
+              "compound_v3"
+            ]
+          }
+        }
+      },
+      "PositionsResponse": {
+        "type": "object",
+        "required": [
+          "address",
+          "summary",
+          "by_protocol",
+          "fetched_at"
+        ],
+        "properties": {
+          "address": {
+            "type": "string",
+            "example": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/PositionsSummary"
+          },
+          "by_protocol": {
+            "type": "object",
+            "description": "Per-protocol breakdown. Keys are protocol IDs.",
+            "additionalProperties": {
+              "type": "object"
+            },
+            "example": {
+              "aave_v3": {
+                "collateral": [
+                  {
+                    "token": "ETH",
+                    "amount": "10.0",
+                    "value_usd": "20611.50"
+                  }
+                ],
+                "debt": [
+                  {
+                    "token": "USDT",
+                    "amount": "3000.0",
+                    "value_usd": "3000.00"
+                  }
+                ],
+                "health_factor": "1.85"
+              }
+            }
+          },
+          "fetched_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-05-27T06:38:20.123456"
+          }
+        }
+      },
+      "TokenRiskReason": {
+        "type": "object",
+        "required": [
+          "signal",
+          "severity",
+          "evidence"
+        ],
+        "properties": {
+          "signal": {
+            "type": "string",
+            "description": "Name of the risk signal",
+            "example": "Honeypot detected"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "description": "Risk severity level",
+            "example": "critical"
+          },
+          "evidence": {
+            "type": "string",
+            "description": "Evidence supporting this risk finding",
+            "example": "Sell transaction simulation failed — tokens cannot be sold"
+          }
+        }
+      },
+      "TokenRiskMetadata": {
+        "type": "object",
+        "required": [
+          "explorer_url",
+          "signals_checked",
+          "confidence"
+        ],
+        "properties": {
+          "explorer_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri",
+            "description": "Block explorer link for this token",
+            "example": "https://etherscan.io/token/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+          },
+          "dexscreener_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri",
+            "description": "DexScreener link for price/liquidity data",
+            "example": null
+          },
+          "signals_checked": {
+            "type": "integer",
+            "description": "Total number of security signals evaluated",
+            "example": 15
+          },
+          "confidence": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "description": "Confidence level of the risk assessment",
+            "example": "high"
+          }
+        }
+      },
+      "TokenRiskResponse": {
+        "type": "object",
+        "required": [
+          "address",
+          "chain",
+          "symbol",
+          "name",
+          "decimals",
+          "risk_score",
+          "risk_level",
+          "reasons",
+          "positive_signals",
+          "metadata",
+          "fetched_at"
+        ],
+        "properties": {
+          "address": {
+            "type": "string",
+            "example": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+          },
+          "chain": {
+            "type": "string",
+            "example": "ethereum"
+          },
+          "symbol": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "USDC"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "USD Coin"
+          },
+          "decimals": {
+            "type": "integer",
+            "example": 6
+          },
+          "risk_score": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "0 = safest, 100 = most dangerous",
+            "example": 2
+          },
+          "risk_level": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "description": "Human-readable risk level",
+            "example": "low"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TokenRiskReason"
+            },
+            "description": "Risk signals detected (empty = safe)"
+          },
+          "positive_signals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "signal",
+                "evidence"
+              ],
+              "properties": {
+                "signal": {
+                  "type": "string",
+                  "example": "Verified contract"
+                },
+                "evidence": {
+                  "type": "string",
+                  "example": "Contract source code verified on Etherscan"
+                }
+              }
+            },
+            "description": "Positive security signals found"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/TokenRiskMetadata"
+          },
+          "fetched_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-05-27T06:38:22.654321"
           }
         }
       }
@@ -1355,6 +4026,32 @@
                 "value": {
                   "detail": "Internal server error",
                   "code": "internal_error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Invalid key or insufficient tier",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "invalidKey": {
+                "summary": "Invalid API key",
+                "value": {
+                  "detail": "Invalid API key",
+                  "code": "invalid_api_key"
+                }
+              },
+              "insufficientTier": {
+                "summary": "Not pro tier",
+                "value": {
+                  "detail": "Admin tier required",
+                  "code": "insufficient_tier"
                 }
               }
             }
